@@ -1,0 +1,13 @@
+coverage:
+  status:
+    project: yes
+    patch: yes
+    changes: yes
+
+comment: false
+
+ignore:
+  - "setup.py"
+  - "pyall/__main__.py"
+  - "pyall/main.py"
+  - "tests"
