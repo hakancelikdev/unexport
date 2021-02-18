@@ -53,3 +53,15 @@ repos:
     rev: 2eaaabed645b33822de0e310851c0c7abfaa500b
     hooks:
       - id: teyit
+
+  - repo: local
+    hooks:
+      - id: pyall
+        name: pyall
+        description:
+          "Pyall is a linter that tries to keep the __all __ in your Python modules
+          always up to date."
+        entry: python -m pyall
+        language: python
+        language_version: python3
+        types: [python]
