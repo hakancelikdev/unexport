@@ -19,7 +19,7 @@ def _visitor_recursive(func: C.Function) -> C.Function:
     return cast(C.Function, wrapper)
 
 
-class _AllItemNameAnalyzer(ast.NodeVisitor):
+class _AllItemAnalyzer(ast.NodeVisitor):
     def __init__(self):
         self.all: Set[str] = set()
         self.classes: Set[str] = set()
@@ -101,7 +101,7 @@ class Analyzer(ast.NodeVisitor):
     def traverse(self) -> None:
         tree = ast.parse(self.source)
         relate.relate(tree)
-        all_item_analyzer = _AllItemNameAnalyzer()
+        all_item_analyzer = _AllItemAnalyzer()
         all_item_analyzer.visit(tree)
         self.all.update(sorted(all_item_analyzer.all))
         self.expected_all.update(sorted(all_item_analyzer.classes))
