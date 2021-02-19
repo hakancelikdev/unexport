@@ -5,7 +5,7 @@ from typing import Set, cast
 from pyall import constants as C
 from pyall import relate
 
-__all__ = ["Analysis"]
+__all__ = ["Analyzer"]
 
 
 def _visitor_recursive(func: C.Function) -> C.Function:
@@ -19,7 +19,7 @@ def _visitor_recursive(func: C.Function) -> C.Function:
     return cast(C.Function, wrapper)
 
 
-class _AllItemNameScanner(ast.NodeVisitor):
+class _AllItemNameAnalyzer(ast.NodeVisitor):
     def __init__(self):
         self.all: Set[str] = set()
         self.classes: Set[str] = set()
@@ -91,7 +91,7 @@ class _AllItemNameScanner(ast.NodeVisitor):
                                 self.all.add(item.s)
 
 
-class Analysis(ast.NodeVisitor):
+class Analyzer(ast.NodeVisitor):
     def __init__(self, *, source: str):
         self.source = source
 
@@ -101,9 +101,9 @@ class Analysis(ast.NodeVisitor):
     def traverse(self) -> None:
         tree = ast.parse(self.source)
         relate.relate(tree)
-        scanner = _AllItemNameScanner()
-        scanner.visit(tree)
-        self.all.update(sorted(scanner.all))
-        self.expected_all.update(sorted(scanner.classes))
-        self.expected_all.update(sorted(scanner.functions))
-        self.expected_all.update(sorted(scanner.variables))
+        all_item_analyzer = _AllItemNameAnalyzer()
+        all_item_analyzer.visit(tree)
+        self.all.update(sorted(all_item_analyzer.all))
+        self.expected_all.update(sorted(all_item_analyzer.classes))
+        self.expected_all.update(sorted(all_item_analyzer.functions))
+        self.expected_all.update(sorted(all_item_analyzer.variables))

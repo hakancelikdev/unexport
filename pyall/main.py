@@ -3,10 +3,10 @@ import sys
 from pathlib import Path
 from typing import Optional, Sequence
 
-from pyall import analysis, color
+from pyall import color
 from pyall import constants as C
 from pyall import utils
-from pyall.analysis import Analysis
+from pyall.analyzer import Analyzer
 
 __all__ = ["main"]
 
@@ -37,21 +37,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     for source_path in args.sources:
         for py_path in utils.list_paths(source_path):
             source, encoding = utils.read(py_path)
-            analysis = Analysis(source=source)
+            analyzer = Analyzer(source=source)
             try:
-                analysis.traverse()
+                analyzer.traverse()
             except SyntaxError as e:
                 print(e, "at ", py_path)
                 return 1
             else:
-                exact = sorted(analysis.all) == sorted(analysis.expected_all)
+                exact = sorted(analyzer.all) == sorted(analyzer.expected_all)
                 if not exact:
                     print(
                         color.paint(py_path.as_posix(), color.YELLOW)
                         + "; "
                         + " -> "
                         + color.paint(
-                            "__all__ = " + str(list(analysis.expected_all)),
+                            "__all__ = " + str(list(analyzer.expected_all)),
                             color.GREEN,
                         )
                     )
