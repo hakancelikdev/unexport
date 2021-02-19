@@ -36,12 +36,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     exact = False
     for source_path in args.sources:
         for py_path in utils.list_paths(source_path):
-            source, encoding = utils.read(py_path)
+            source, _ = utils.read(py_path)
             analyzer = Analyzer(source=source)
             try:
                 analyzer.traverse()
             except SyntaxError as e:
-                print(e, "at ", py_path)
+                color.paint(str(e) + "at " + py_path.as_posix(), color.RED)
                 return 1
             else:
                 exact = sorted(analyzer.all) == sorted(analyzer.expected_all)
