@@ -9,14 +9,13 @@ from pyall import constants as C
 __all__ = ["diff", "list_paths", "read"]
 
 
-def read(path: Path) -> Tuple[str, str]:
+def read(path: Path) -> str:
     try:
         with tokenize.open(path) as stream:
             source = stream.read()
-            encoding = stream.encoding
     except (OSError, SyntaxError) as err:
-        return "", "utf-8"
-    return source, encoding
+        return ""
+    return source
 
 
 def list_paths(

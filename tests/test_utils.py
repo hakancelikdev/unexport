@@ -11,4 +11,4 @@ class UtilsTestCase(unittest.TestCase):
         self.assertEqual(
             len(list(utils.list_paths(Path("tests/test_utils.py")))), 1
         )
-        self.assertEqual(len(list(utils.list_paths(Path("tests")))), 2)
+        self.assertEqual(len(list(utils.list_paths(Path("tests")))), 3)

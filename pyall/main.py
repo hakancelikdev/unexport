@@ -5,8 +5,7 @@ from typing import Optional, Sequence
 
 from pyall import color
 from pyall import constants as C
-from pyall import utils
-from pyall.analyzer import Analyzer
+from pyall.session import Session
 
 __all__ = ["main"]
 
@@ -33,25 +32,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     argv = argv if argv is not None else sys.argv[1:]
     args = parser.parse_args(argv)
-    exact = False
-    for source_path in args.sources:
-        for py_path in utils.list_paths(source_path):
-            source, _ = utils.read(py_path)
-            analyzer = Analyzer(source=source)
+    for path in args.sources:
+        for source, py_path in Session.get_source(path):
             try:
-                analyzer.traverse()
+                match, expected_all = Session.get_expected_all(source)
             except SyntaxError as e:
                 color.paint(str(e) + "at " + py_path.as_posix(), color.RED)
                 return 1
             else:
-                exact = sorted(analyzer.all) == sorted(analyzer.expected_all)
-                if not exact:
+                if not match:
                     print(
                         color.paint(py_path.as_posix(), color.YELLOW)
                         + "; "
                         + " -> "
                         + color.paint(
-                            "__all__ = " + str(list(analyzer.expected_all)),
+                            "__all__ = " + str(expected_all),
                             color.GREEN,
                         )
                     )

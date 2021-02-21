@@ -1,9 +1,8 @@
 import ast
 import functools
-from typing import Set, cast
+from typing import Iterator, Optional, Set, cast
 
 from pyall import constants as C
-from pyall import relate
 
 __all__ = ["Analyzer"]
 
@@ -28,7 +27,7 @@ class _AllItemAnalyzer(ast.NodeVisitor):
 
     @_visitor_recursive
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
-        if not relate.first_occurrence(
+        if not Analyzer.first_occurrence(
             node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
         ):
             if not node.name.startswith("_"):
@@ -36,7 +35,7 @@ class _AllItemAnalyzer(ast.NodeVisitor):
 
     @_visitor_recursive
     def visit_FunctionDef(self, node: C.ASTFunctionT) -> None:
-        if not relate.first_occurrence(
+        if not Analyzer.first_occurrence(
             node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
         ):
             if not node.name.startswith("_"):
@@ -46,7 +45,7 @@ class _AllItemAnalyzer(ast.NodeVisitor):
 
     @_visitor_recursive
     def visit_Name(self, node: ast.Name) -> None:
-        if not relate.first_occurrence(
+        if not Analyzer.first_occurrence(
             node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
         ):
             if (
@@ -91,7 +90,7 @@ class _AllItemAnalyzer(ast.NodeVisitor):
                                 self.all.add(item.s)
 
 
-class Analyzer(ast.NodeVisitor):
+class Analyzer:
     def __init__(self, *, source: str):
         self.source = source
 
@@ -100,10 +99,33 @@ class Analyzer(ast.NodeVisitor):
 
     def traverse(self) -> None:
         tree = ast.parse(self.source)
-        relate.relate(tree)
+        self.relate(tree)
         all_item_analyzer = _AllItemAnalyzer()
         all_item_analyzer.visit(tree)
         self.all.update(sorted(all_item_analyzer.all))
         self.expected_all.update(sorted(all_item_analyzer.classes))
         self.expected_all.update(sorted(all_item_analyzer.functions))
         self.expected_all.update(sorted(all_item_analyzer.variables))
+
+    @classmethod
+    def relate(cls, tree: ast.AST, parent: Optional[ast.AST] = None) -> None:
+        tree.parent = parent  # type: ignore
+        for node in ast.walk(tree):
+            for child in ast.iter_child_nodes(node):
+                child.parent = node  # type: ignore
+
+    @classmethod
+    def get_parents(cls, node: ast.AST) -> Iterator[ast.AST]:
+        parent = node
+        while parent:
+            parent = parent.parent  # type: ignore
+            if parent:
+                yield parent
+
+    @classmethod
+    def first_occurrence(cls, node: ast.AST, *ancestors):
+        for parent in cls.get_parents(node):
+            if isinstance(parent, ancestors):
+                return parent
+        else:
+            return None
