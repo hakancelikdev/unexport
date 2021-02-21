@@ -24,6 +24,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         type=Path,
     )
     parser.add_argument(
+        "-r",
+        "--refactor",
+        action="store_true",
+        help="Auto-sync __all__ list in python modules automatically.",
+    )
+    parser.add_argument(
         "-v",
         "--version",
         action="version",
@@ -36,21 +42,27 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         for source, py_path in Session.get_source(path):
             try:
                 match, expected_all = Session.get_expected_all(source)
+                if match:
+                    continue
             except SyntaxError as e:
                 color.paint(str(e) + "at " + py_path.as_posix(), color.RED)
                 return 1
+            if args.refactor:
+                Session.refactor(path=py_path, apply=True)
+                print(
+                    f"Refactoring '{color.paint(str(py_path), color.GREEN)}'"
+                )
             else:
-                if not match:
-                    print(
-                        color.paint(py_path.as_posix(), color.YELLOW)
-                        + "; "
-                        + " -> "
-                        + color.paint(
-                            "__all__ = " + str(expected_all),
-                            color.GREEN,
-                        )
+                print(
+                    color.paint(py_path.as_posix(), color.YELLOW)
+                    + "; "
+                    + " -> "
+                    + color.paint(
+                        "__all__ = " + str(expected_all),
+                        color.GREEN,
                     )
-                    return 1
+                )
+            return 1
     return 0
 
 

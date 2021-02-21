@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Iterator, List, Tuple
+from typing import Iterator, List, Tuple, Union
 
 from pyall import utils
 from pyall.analyzer import Analyzer
@@ -12,7 +12,7 @@ class Session:
     @staticmethod
     def get_source(path: Path) -> Iterator[Tuple[str, Path]]:
         for py_path in utils.list_paths(path):
-            source = utils.read(py_path)
+            source, _ = utils.read(py_path)
             yield source, py_path
 
     @staticmethod
@@ -25,9 +25,10 @@ class Session:
         return match, list(expected_all)
 
     @classmethod
-    def refactor(cls, source: str) -> str:
-        match, expected_all = cls.get_expected_all(source)
-        if match:
-            return source
-        else:
-            return refactor_source(source, expected_all)
+    def refactor(cls, path: Path, apply: bool = False) -> Union[bool, str]:
+        source, encoding = utils.read(path)
+        _, expected_all = cls.get_expected_all(source)
+        new_source = refactor_source(source, expected_all)
+        if apply:
+            path.write_text(new_source, encoding=encoding)
+        return new_source

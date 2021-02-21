@@ -5,7 +5,9 @@ from setuptools import setup
 
 import pyall.constants as C
 
-__all__ = ["get_long_description", "CURRENT_DIR"]
+__all__ = ["CURRENT_DIR", "get_long_description"]
+
+
 assert sys.version_info >= (3, 6), "pyall requires Python 3.6+"
 
 CURRENT_DIR = Path(__file__).parent
