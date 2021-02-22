@@ -8,7 +8,7 @@ import pyall.constants as C
 __all__ = ["CURRENT_DIR", "get_long_description"]
 
 
-assert sys.version_info >= (3, 6), "pyall requires Python 3.6+"
+assert sys.version_info >= (3, 8), "pyall requires Python 3.8+"
 
 CURRENT_DIR = Path(__file__).parent
 
@@ -35,7 +35,7 @@ setup(
     },
     license="GNU General Public License v3.0",
     license_file="LICENSE",
-    python_requires=">=3.6",
+    python_requires=">=3.8",
     packages=["pyall"],
     install_requires=[],
     extras_require={},
@@ -48,8 +48,6 @@ setup(
         "Environment :: Console",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: Implementation :: CPython",

@@ -118,8 +118,7 @@ class Analyzer:
     def get_parents(node: ast.AST) -> Iterator[ast.AST]:
         parent = node
         while parent:
-            parent = parent.parent  # type: ignore
-            if parent:
+            if parent := parent.parent:  # type: ignore
                 yield parent
 
     @classmethod
