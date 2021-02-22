@@ -43,22 +43,15 @@ def _splitlines_no_ff(source):
 
 
 def refactor_source(source: str, expected_all: List[str]) -> str:
+    if not expected_all:
+        return source
     location = _find_location(source)
     lines = _splitlines_no_ff(source)
-    try:
-        next_line = lines[location + 1]
-    except IndexError:
-        pass
-    else:
-        if location == 0 and next_line != "\n":
-            lines.insert(location, "\n")
-            lines.insert(location, f"__all__ = {str(expected_all)}\n")
-    try:
-        location_line = lines[location]
-    except IndexError:
-        pass
-    else:
-        if location_line == "\n":
-            lines.insert(location, f"__all__ = {str(expected_all)}\n")
-            lines.insert(location, "\n")
+    lines.insert(location, f"__all__ = {str(expected_all)}\n")
+    next_line = lines[location + 1]
+    previous_line = lines[location - 1]
+    if location == 0 and next_line != "\n":
+        lines.insert(location + 1, "\n")
+    if next_line == "\n" and previous_line != "\n":
+        lines.insert(location, "\n")
     return "".join(lines)
