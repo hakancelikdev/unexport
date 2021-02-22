@@ -107,15 +107,15 @@ class Analyzer:
         self.expected_all.update(sorted(all_item_analyzer.functions))
         self.expected_all.update(sorted(all_item_analyzer.variables))
 
-    @classmethod
-    def relate(cls, tree: ast.AST, parent: Optional[ast.AST] = None) -> None:
+    @staticmethod
+    def relate(tree: ast.AST, parent: Optional[ast.AST] = None) -> None:
         tree.parent = parent  # type: ignore
         for node in ast.walk(tree):
             for child in ast.iter_child_nodes(node):
                 child.parent = node  # type: ignore
 
-    @classmethod
-    def get_parents(cls, node: ast.AST) -> Iterator[ast.AST]:
+    @staticmethod
+    def get_parents(node: ast.AST) -> Iterator[ast.AST]:
         parent = node
         while parent:
             parent = parent.parent  # type: ignore
@@ -125,7 +125,7 @@ class Analyzer:
     @classmethod
     def first_occurrence(cls, node: ast.AST, *ancestors):
         for parent in cls.get_parents(node):
-            if isinstance(parent, ancestors):
+            if isinstance(parent, *ancestors):
                 return parent
         else:
-            return None
+            return False

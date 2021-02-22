@@ -1,15 +1,35 @@
+import os
+import tempfile
 import textwrap
+from contextlib import contextmanager
+from pathlib import Path
+from typing import Iterator
 
 import pytest
 
 from pyall.session import Session
 
-__all__ = ["test_refactor"]
+__all__ = ["reopenable_temp_file", "test_refactor"]
+
+
+@contextmanager
+def reopenable_temp_file(content: str) -> Iterator[Path]:
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".py", encoding="utf-8", delete=False
+        ) as tmp:
+            tmp_path = Path(tmp.name)
+            tmp.write(content)
+        yield tmp_path
+    finally:
+        os.unlink(tmp_path)
 
 
 def _is_equal_source_to_refactor(action: str, expected: str) -> bool:
-    expected_source = Session.refactor(source=textwrap.dedent(action))
-    return textwrap.dedent(expected) == expected_source
+    source = textwrap.dedent(action)
+    with reopenable_temp_file(source) as tmp:
+        expected_source = Session.refactor(path=tmp, apply=False)
+        return textwrap.dedent(expected) == expected_source
 
 
 cases = [
