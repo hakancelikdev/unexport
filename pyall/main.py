@@ -5,6 +5,7 @@ from typing import Optional, Sequence
 
 from pyall import color
 from pyall import constants as C
+from pyall import utils
 from pyall.session import Session
 
 __all__ = ["main"]
@@ -30,6 +31,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         help="Auto-sync __all__ list in python modules automatically.",
     )
     parser.add_argument(
+        "-d",
+        "--diff",
+        action="store_true",
+        help="Prints a diff of all the changes Pyall would make to a file.",
+    )
+    parser.add_argument(
         "-v",
         "--version",
         action="version",
@@ -52,7 +59,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 print(
                     f"Refactoring '{color.paint(str(py_path), color.GREEN)}'"
                 )
-            else:
+            if args.diff:
+                new_source = Session.refactor(path=py_path, apply=False)
+                diff = utils.diff(
+                    action=source.splitlines(),
+                    expected=new_source.splitlines(),
+                    fromfile=py_path,
+                )
+                print(color.diff(diff))
+            if not args.diff and not args.refactor:
                 print(
                     color.paint(py_path.as_posix(), color.YELLOW)
                     + "; "

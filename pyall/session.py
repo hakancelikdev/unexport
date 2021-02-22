@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Iterator, List, Tuple, Union
+from typing import Iterator, List, Tuple
 
 from pyall import utils
 from pyall.analyzer import Analyzer
@@ -25,7 +25,7 @@ class Session:
         return match, list(expected_all)
 
     @classmethod
-    def refactor(cls, path: Path, apply: bool = False) -> Union[bool, str]:
+    def refactor(cls, path: Path, apply: bool = False) -> str:
         source, encoding = utils.read(path)
         _, expected_all = cls.get_expected_all(source)
         new_source = refactor_source(source, expected_all)

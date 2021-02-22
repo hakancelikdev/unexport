@@ -89,6 +89,61 @@ cases = [
                 import tt
         """,
     ),
+    (  #  import & start != 0
+        """\
+            import x
+
+            __all__ = ['test']
+
+            def test():...
+
+            def f():...
+        """,
+        """\
+            import x
+
+            __all__ = ['f', 'test']
+
+            def test():...
+
+            def f():...
+        """,
+    ),
+    (  # start == 0
+        """\
+            __all__ = ['test']
+
+            def test():...
+
+            def f():...
+        """,
+        """\
+            __all__ = ['f', 'test']
+
+            def test():...
+
+            def f():...
+        """,
+    ),
+    (
+        """\
+            __all__ = [
+                'x',
+                'y',
+                'z',
+                's',
+            ]
+
+            def x():...
+
+        """,
+        """\
+            __all__ = ['x']
+
+            def x():...
+
+        """,
+    ),
 ]
 
 

@@ -1,19 +1,22 @@
 import sys
+from typing import Tuple
 
 __all__ = [
-    "GREEN",
     "BLACK",
-    "CYAN",
-    "paint",
-    "TERMINAL_SUPPORT_COLOR",
-    "BOLD_WHITE",
-    "YELLOW",
-    "MAGENTA",
-    "WHITE",
-    "RESET",
     "BLUE",
+    "BOLD_WHITE",
+    "CYAN",
+    "GREEN",
+    "MAGENTA",
     "RED",
+    "RESET",
+    "TERMINAL_SUPPORT_COLOR",
+    "WHITE",
+    "YELLOW",
+    "diff",
+    "paint",
 ]
+
 if sys.platform == "win32":  # pragma: no cover (windows)
 
     def _enable() -> None:
@@ -80,3 +83,17 @@ def paint(content: str, color: str) -> str:
         return color + content + RESET
     else:
         return content
+
+
+def diff(content: Tuple[str, ...]) -> str:  # pragma: no cover
+    lines = list(content)
+    for i, line in enumerate(lines):
+        if line.startswith("+++") or line.startswith("---"):
+            lines[i] = paint(line, BOLD_WHITE)
+        elif line.startswith("@@"):
+            lines[i] = paint(line, CYAN)
+        elif line.startswith("+"):
+            lines[i] = paint(line, GREEN)
+        elif line.startswith("-"):
+            lines[i] = paint(line, RED)
+    return "\n".join(lines)

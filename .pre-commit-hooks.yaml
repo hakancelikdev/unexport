@@ -3,7 +3,7 @@
   description:
     "Pyall is a linter that tries to keep the __all __ in your Python modules always up
     to date."
-  entry: pyall --remove
+  entry: pyall
   language: python
   language_version: python3
   types: [python]
