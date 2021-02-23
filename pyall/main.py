@@ -64,6 +64,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = parser.parse_args(argv)
     config = Config(include=args.include, exclude=args.exclude)
     session = Session(config=config)
+    exit_code = 0
     for path in args.sources:
         for source, py_path in session.get_source(path):
             try:
@@ -72,7 +73,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     continue
             except SyntaxError as e:
                 color.paint(str(e) + "at " + py_path.as_posix(), color.RED)
-                return 1
+                continue
+            else:
+                exit_code = 1
             if args.refactor:
                 session.refactor(path=py_path, apply=True)
                 print(
@@ -96,8 +99,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         color.GREEN,
                     )
                 )
-            return 1
-    return 0
+    return exit_code
 
 
 if __name__ == "__main__":
