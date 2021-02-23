@@ -30,3 +30,42 @@ packaging tools. We recommend installing the latest stable release from PyPI wit
 ```shell
 $ pip install pyall
 ```
+
+### Command line options
+
+You can list many options by running pyall --help
+
+```
+usage: Pyall [-h] [-r] [-d] [--include include] [--exclude exclude] [-v] [sources [sources ...]]
+
+Pyall is a linter that tries to keep the __all __ in your Python modules always up to date.
+
+positional arguments:
+  sources            Enter the directories and file paths you want to analyze.
+
+optional arguments:
+  -h, --help         show this help message and exit
+  -r, --refactor     Auto-sync __all__ list in python modules automatically.
+  -d, --diff         Prints a diff of all the changes Pyall would make to a file.
+  --include include  File include pattern.
+  --exclude exclude  File exclude pattern.
+  -v, --version      Prints version of pyall
+```
+
+### Adding pre-commit plugins to your project
+
+Once you have [pre-commit](https://pre-commit.com/)
+[installed](https://pre-commit.com/#install), adding pre-commit plugins to your project
+is done with the .pre-commit-config.yaml configuration file.
+
+Add a file called .pre-commit-config.yaml to the root of your project. The pre-commit
+config file describes what repositories and hooks are installed.
+
+```yaml
+repos:
+  - repo: https://github.com/hakancelik96/pyall
+    rev: stable
+    hooks:
+      - id: pyall
+        args: [--refactor]
+```

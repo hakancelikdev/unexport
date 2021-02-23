@@ -3,15 +3,20 @@ from typing import Iterator, List, Tuple
 
 from pyall import utils
 from pyall.analyzer import Analyzer
+from pyall.config import Config
 from pyall.refactor import refactor_source
 
 __all__ = ["Session"]
 
 
 class Session:
-    @staticmethod
-    def get_source(path: Path) -> Iterator[Tuple[str, Path]]:
-        for py_path in utils.list_paths(path):
+    def __init__(self, config: Config):
+        self.config = config
+
+    def get_source(self, path: Path) -> Iterator[Tuple[str, Path]]:
+        for py_path in utils.list_paths(
+            path, include=self.config.include, exclude=self.config.exclude
+        ):
             source, _ = utils.read(py_path)
             yield source, py_path
 
