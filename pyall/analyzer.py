@@ -1,5 +1,8 @@
 import ast
 import functools
+import io
+import re
+import tokenize
 from typing import Iterator, Optional, Set, cast
 
 from pyall import constants as C
@@ -11,9 +14,37 @@ def _visitor_recursive(func: C.Function) -> C.Function:
     """Decorator to make visitor work recursive."""
 
     @functools.wraps(func)
-    def wrapper(self, *args, **kwargs):
-        func(self, *args, **kwargs)
-        self.generic_visit(*args)
+    def wrapper(obj, *args, **kwargs):
+        func(obj, *args, **kwargs)
+        obj.generic_visit(*args)
+
+    return cast(C.Function, wrapper)
+
+
+def _node_skip(func: C.Function) -> C.Function:
+    @functools.wraps(func)
+    def wrapper(obj, *args, **kwargs):
+        assert (
+            len(args) <= 1
+        ), "Please don't forget to add the node value as the first parameter."
+        node = args[0]
+        if not node.skip:
+            func(obj, *args, **kwargs)
+
+    return cast(C.Function, wrapper)
+
+
+def _node_parent_not_class_or_function(func: C.Function) -> C.Function:
+    @functools.wraps(func)
+    def wrapper(obj, *args, **kwargs):
+        assert (
+            len(args) <= 1
+        ), "Please don't forget to add the node value as the first parameter."
+        node = args[0]
+        if not Analyzer.first_occurrence(
+            node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
+        ):
+            func(obj, *args, **kwargs)
 
     return cast(C.Function, wrapper)
 
@@ -25,35 +56,32 @@ class _AllItemAnalyzer(ast.NodeVisitor):
         self.functions: Set[str] = set()
         self.variables: Set[str] = set()
 
+    @_node_skip
+    @_node_parent_not_class_or_function
     @_visitor_recursive
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
-        if not Analyzer.first_occurrence(
-            node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
-        ):
-            if not node.name.startswith("_"):
-                self.classes.add(node.name)
+        if not node.name.startswith("_"):
+            self.classes.add(node.name)
 
+    @_node_skip
+    @_node_parent_not_class_or_function
     @_visitor_recursive
     def visit_FunctionDef(self, node: C.ASTFunctionT) -> None:
-        if not Analyzer.first_occurrence(
-            node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
-        ):
-            if not node.name.startswith("_"):
-                self.functions.add(node.name)
+        if not node.name.startswith("_"):
+            self.functions.add(node.name)
 
     visit_AsyncFunctionDef = visit_FunctionDef
 
+    @_node_skip
+    @_node_parent_not_class_or_function
     @_visitor_recursive
     def visit_Name(self, node: ast.Name) -> None:
-        if not Analyzer.first_occurrence(
-            node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
+        if (
+            isinstance(node.ctx, ast.Store)
+            and (node.id.isupper() or node.id[0].isupper())
+            and not node.id.startswith("_")
         ):
-            if (
-                isinstance(node.ctx, ast.Store)
-                and (node.id.isupper() or node.id[0].isupper())
-                and not node.id.startswith("_")
-            ):
-                self.variables.add(node.id)
+            self.variables.add(node.id)
 
     @_visitor_recursive
     def visit_Assign(self, node: ast.Assign) -> None:
@@ -91,6 +119,8 @@ class _AllItemAnalyzer(ast.NodeVisitor):
 
 
 class Analyzer:
+    skip_import_comments_regex = "#.*(pyall: {0,1}skip)"
+
     def __init__(self, *, source: str):
         self.source = source
 
@@ -100,12 +130,39 @@ class Analyzer:
     def traverse(self) -> None:
         tree = ast.parse(self.source)
         self.relate(tree)
+        self.set_skip_node(tree)
         all_item_analyzer = _AllItemAnalyzer()
         all_item_analyzer.visit(tree)
         self.all.update(sorted(all_item_analyzer.all))
         self.expected_all.update(sorted(all_item_analyzer.classes))
         self.expected_all.update(sorted(all_item_analyzer.functions))
         self.expected_all.update(sorted(all_item_analyzer.variables))
+
+    def set_skip_node(self, tree: ast.AST) -> None:
+        skip = set()
+        readline = io.StringIO(self.source).readline
+        for type_, string, start, end, line in tokenize.generate_tokens(
+            readline
+        ):
+            if re.search(self.skip_import_comments_regex, line, re.IGNORECASE):
+                lineno = start[0]
+                skip.add(lineno)
+        for node in ast.walk(tree):
+            if (
+                isinstance(
+                    node,
+                    (
+                        ast.ClassDef,
+                        ast.FunctionDef,
+                        ast.AsyncFunctionDef,
+                        ast.Name,
+                    ),
+                )
+                and node.lineno in skip
+            ):
+                node.skip = True  # type: ignore
+            else:
+                node.skip = False  # type: ignore
 
     @staticmethod
     def relate(tree: ast.AST, parent: Optional[ast.AST] = None) -> None:
