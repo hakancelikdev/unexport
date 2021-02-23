@@ -6,7 +6,7 @@
 date.**
 
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/hakancelik96/pyall/master.svg)](https://results.pre-commit.ci/latest/github/hakancelik96/pyall/master)
-![test](https://github.com/hakancelik96/pyall/workflows/Test/badge.svg)
+[![test](https://github.com/hakancelik96/pyall/actions/workflows/tests.yml/badge.svg)](https://github.com/hakancelik96/pyall/actions/workflows/tests.yml)
 
 [![Pypi](https://img.shields.io/pypi/v/pyall)](https://pypi.org/project/pyall/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyall)
