@@ -47,7 +47,7 @@ repos:
     rev: v2.10.0
     hooks:
       - id: pyupgrade
-        args: [--py36-plus]
+        args: [--py38-plus]
 
   - repo: https://github.com/isidentical/teyit
     rev: 2eaaabed645b33822de0e310851c0c7abfaa500b

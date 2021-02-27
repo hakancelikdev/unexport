@@ -8,6 +8,7 @@ __all__ = [
     "Function",
     "GLOB_PATTERN",
     "INCLUDE_REGEX_PATTERN",
+    "SKIP_IMPORT_COMMENTS_REGEX_PATTERN",
     "VERSION",
 ]
 
@@ -18,7 +19,8 @@ DESCRIPTION = "Pyall is a linter that tries to keep the __all __ in your Python 
 Function = TypeVar("Function", bound=Callable[..., Any])
 ASTFunctionT = Union[ast.FunctionDef, ast.AsyncFunctionDef]
 
-
+# REGEX
 INCLUDE_REGEX_PATTERN = r"\.(py)$"
 EXCLUDE_REGEX_PATTERN = r"^$"
 GLOB_PATTERN = r"**/*.py"
+SKIP_IMPORT_COMMENTS_REGEX_PATTERN = r"#.*(pyall: {0,1}not-public)"

@@ -29,37 +29,11 @@ def _find_location(source: str) -> _Location:
     return location
 
 
-def _splitlines_no_ff(source):
-    # https://github.com/python/cpython/blob/693aeacf8851d1e9995073e27e50644a505dc49c/Lib/ast.py#L296
-    """Split a string into lines ignoring form feed and other chars.
-
-    This mimics how the Python parser splits source code.
-    """
-    idx = 0
-    lines = []
-    next_line = ""
-    while idx < len(source):
-        c = source[idx]
-        next_line += c
-        idx += 1
-        # Keep \r\n together
-        if c == "\r" and idx < len(source) and source[idx] == "\n":
-            next_line += "\n"
-            idx += 1
-        if c in "\r\n":
-            lines.append(next_line)
-            next_line = ""
-
-    if next_line:
-        lines.append(next_line)
-    return lines
-
-
 def refactor_source(source: str, expected_all: List[str]) -> str:
     if not expected_all:
         return source
     location = _find_location(source)
-    lines = _splitlines_no_ff(source)
+    lines = ast._splitlines_no_ff(source)  # type: ignore
 
     if location.all_exists:
         if location.start != location.end:

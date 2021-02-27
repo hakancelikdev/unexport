@@ -36,6 +36,17 @@ class AnalyzerVariableTestCase(unittest.TestCase):
         self.assertSetEqual(analyzer.all, {"TEST_VAR"})
         self.assertSetEqual(analyzer.expected_all, {"TEST_VAR"})
 
+    def test_not_public_comment(self):
+        source = textwrap.dedent(
+            """\
+                TEST_VAR = 1 # pyall: not-public
+            """
+        )
+        analyzer = Analyzer(source=source)
+        analyzer.traverse()
+        self.assertSetEqual(analyzer.all, set())
+        self.assertSetEqual(analyzer.expected_all, set())
+
 
 class AnalyzerFunctionTestCase(unittest.TestCase):
     def test_primitive_function(self):
@@ -94,10 +105,10 @@ class AnalyzerTestCase(unittest.TestCase):
         self.assertSetEqual(analyzer.all, set())
         self.assertSetEqual(analyzer.expected_all, set())
 
-    def test_tree_analyzer(self):
+    def test_set_skip_node(self):
         source = textwrap.dedent(
             """\
-                TEST_SKIP_VAR = 0 # pyall: skip
+                TEST_SKIP_VAR = 0 # pyall: not-public
 
                 TEST_VAR = 1
             """
@@ -109,7 +120,11 @@ class AnalyzerTestCase(unittest.TestCase):
         self.assertFalse(nodes[0].skip)
         self.assertFalse(nodes[1].skip)
         self.assertFalse(nodes[2].skip)
+
         self.assertTrue(nodes[3].skip)
+        self.assertIsInstance(nodes[3], ast.Name)
+        self.assertEqual(nodes[3].id, "TEST_SKIP_VAR")
+
         self.assertFalse(nodes[4].skip)
         self.assertFalse(nodes[5].skip)
         self.assertFalse(nodes[6].skip)
