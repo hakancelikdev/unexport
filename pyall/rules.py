@@ -3,7 +3,7 @@ from __future__ import annotations
 import ast
 import functools
 from dataclasses import dataclass
-from typing import cast
+from typing import Callable, Iterator, cast
 
 from pyall import constants as C
 from pyall.relate import first_occurrence
@@ -18,23 +18,23 @@ class InvalidRuleFunctionError(BaseException):
 @dataclass
 class Rule:
     nodes: ast.AST
-    rule: C.Function
+    rule: Callable[[ast.AST], None]
 
     @classmethod
-    def register(cls, nodes: C.Function | tuple[C.Function]):
+    def register(cls, nodes: ast.AST | tuple[ast.AST]) -> C.Function:
         if not (nodes, tuple):
             nodes = (nodes,)
 
-        def f(rule):
+        def f(rule: C.Function) -> None:
             cls.validate_rule(rule)
             if not hasattr(cls, "rules"):
                 cls.rules = []
             cls.rules.append(cls(nodes=nodes, rule=rule))
 
-        return f
+        return cast(C.Function, f)
 
     @classmethod
-    def filter_by_node(cls, node) -> Rule.rule:
+    def filter_by_node(cls, node) -> Iterator[Rule.rule]:
         for rule in cls.rules:
             if isinstance(node, rule.nodes):
                 yield rule.rule
@@ -42,7 +42,7 @@ class Rule:
     @classmethod
     def apply_rules(cls, func: C.Function) -> C.Function:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> None:
             obj = args[0]
             node = args[1]
 
@@ -55,7 +55,7 @@ class Rule:
         return cast(C.Function, wrapper)
 
     @classmethod
-    def validate_rule(cls, rule: Rule) -> bool:
+    def validate_rule(cls, rule: Rule.rule) -> bool:
         if not rule.__name__.startswith("_rule_"):
             raise InvalidRuleFunctionError(
                 "Rule function name must start with '_rule_'."
