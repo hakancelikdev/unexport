@@ -1,7 +1,5 @@
 ## Get Started
 
-![pyall](https://raw.githubusercontent.com/hakancelik96/pyall/master/images/logo/pyall.png ":size=60%")
-
 **Pyall is a linter that tries to keep the **all ** in your Python modules always up to
 date.**
 
