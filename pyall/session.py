@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterator, List, Tuple
 
@@ -9,9 +10,9 @@ from pyall.refactor import refactor_source
 __all__ = ["Session"]
 
 
+@dataclass
 class Session:
-    def __init__(self, config: Config):
-        self.config = config
+    config: Config
 
     def get_source(self, path: Path) -> Iterator[Tuple[str, Path]]:
         for py_path in utils.list_paths(
@@ -24,10 +25,8 @@ class Session:
     def get_expected_all(source: str) -> Tuple[bool, List[str]]:
         analyzer = Analyzer(source=source)
         analyzer.traverse()
-        action_all = sorted(analyzer.all)
-        expected_all = sorted(analyzer.expected_all)
-        match = action_all == expected_all
-        return match, list(expected_all)
+        match = analyzer.actual_all == analyzer.expected_all
+        return match, analyzer.expected_all
 
     @classmethod
     def refactor(cls, path: Path, apply: bool = False) -> str:

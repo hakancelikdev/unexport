@@ -27,7 +27,6 @@ repos:
     rev: v0.800
     hooks:
       - id: mypy
-        args: [--no-strict-optional, --ignore-missing-imports]
 
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v2.2.1
@@ -49,10 +48,10 @@ repos:
       - id: pyupgrade
         args: [--py38-plus]
 
-  - repo: https://github.com/isidentical/teyit
-    rev: 2eaaabed645b33822de0e310851c0c7abfaa500b
+  - repo: https://github.com/pycqa/flake8
+    rev: "3.9.0"
     hooks:
-      - id: teyit
+      - id: flake8
 
   - repo: local
     hooks:

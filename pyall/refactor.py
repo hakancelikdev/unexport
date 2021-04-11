@@ -19,13 +19,15 @@ def _find_location(source: str) -> _Location:
             and getattr(node.targets[0], "id", None) == "__all__"
         ):
             return location._replace(
-                start=node.lineno - 1, end=node.end_lineno, all_exists=True
+                start=node.lineno - 1,
+                end=node.end_lineno or 0,
+                all_exists=True,
             )
         elif (
             isinstance(node, (ast.Import, ast.ImportFrom))
             and node.lineno > location.start
         ):
-            location = location._replace(start=node.end_lineno)
+            location = location._replace(start=node.end_lineno or 0)
     return location
 
 

@@ -21,8 +21,8 @@ class AnalyzerVariableTestCase(unittest.TestCase):
         )
         analyzer = Analyzer(source=source)
         analyzer.traverse()
-        self.assertSetEqual(analyzer.all, set())
-        self.assertSetEqual(analyzer.expected_all, {"TEST_VAR"})
+        self.assertFalse(analyzer.actual_all)
+        self.assertListEqual(analyzer.expected_all, ["TEST_VAR"])
 
     def test_primitive_variable_has_all(self):
         source = textwrap.dedent(
@@ -33,8 +33,8 @@ class AnalyzerVariableTestCase(unittest.TestCase):
         )
         analyzer = Analyzer(source=source)
         analyzer.traverse()
-        self.assertSetEqual(analyzer.all, {"TEST_VAR"})
-        self.assertSetEqual(analyzer.expected_all, {"TEST_VAR"})
+        self.assertListEqual(analyzer.actual_all, ["TEST_VAR"])
+        self.assertListEqual(analyzer.expected_all, ["TEST_VAR"])
 
     def test_not_public_comment(self):
         source = textwrap.dedent(
@@ -44,8 +44,8 @@ class AnalyzerVariableTestCase(unittest.TestCase):
         )
         analyzer = Analyzer(source=source)
         analyzer.traverse()
-        self.assertSetEqual(analyzer.all, set())
-        self.assertSetEqual(analyzer.expected_all, set())
+        self.assertFalse(analyzer.actual_all)
+        self.assertFalse(analyzer.expected_all)
 
 
 class AnalyzerFunctionTestCase(unittest.TestCase):
@@ -57,8 +57,8 @@ class AnalyzerFunctionTestCase(unittest.TestCase):
         )
         analyzer = Analyzer(source=source)
         analyzer.traverse()
-        self.assertSetEqual(analyzer.all, set())
-        self.assertSetEqual(analyzer.expected_all, {"function"})
+        self.assertFalse(analyzer.actual_all)
+        self.assertListEqual(analyzer.expected_all, ["function"])
 
     def test_primitive_function_has_all(self):
         source = textwrap.dedent(
@@ -69,8 +69,8 @@ class AnalyzerFunctionTestCase(unittest.TestCase):
         )
         analyzer = Analyzer(source=source)
         analyzer.traverse()
-        self.assertSetEqual(analyzer.all, {"function"})
-        self.assertSetEqual(analyzer.expected_all, {"function"})
+        self.assertListEqual(analyzer.actual_all, ["function"])
+        self.assertListEqual(analyzer.expected_all, ["function"])
 
 
 class AnalyzerClassesTestCase(unittest.TestCase):
@@ -82,8 +82,8 @@ class AnalyzerClassesTestCase(unittest.TestCase):
         )
         analyzer = Analyzer(source=source)
         analyzer.traverse()
-        self.assertSetEqual(analyzer.all, set())
-        self.assertSetEqual(analyzer.expected_all, {"Klass"})
+        self.assertFalse(analyzer.actual_all)
+        self.assertListEqual(analyzer.expected_all, ["Klass"])
 
     def test_primitive_class_has_all(self):
         source = textwrap.dedent(
@@ -94,28 +94,28 @@ class AnalyzerClassesTestCase(unittest.TestCase):
         )
         analyzer = Analyzer(source=source)
         analyzer.traverse()
-        self.assertSetEqual(analyzer.all, {"Klass"})
-        self.assertSetEqual(analyzer.expected_all, {"Klass"})
+        self.assertListEqual(analyzer.actual_all, ["Klass"])
+        self.assertListEqual(analyzer.expected_all, ["Klass"])
 
 
 class AnalyzerTestCase(unittest.TestCase):
     def test_emty(self):
         analyzer = Analyzer(source="")
         analyzer.traverse()
-        self.assertSetEqual(analyzer.all, set())
-        self.assertSetEqual(analyzer.expected_all, set())
+        self.assertFalse(analyzer.actual_all)
+        self.assertFalse(analyzer.expected_all)
 
-    def test_set_skip_node(self):
+    def test_set_extra_attr(self):
         source = textwrap.dedent(
             """\
                 TEST_SKIP_VAR = 0 # pyall: not-public
 
-                TEST_VAR = 1
+                TEST_VAR = 1 # pyall: public
             """
         )
         analyzer = Analyzer(source=source)
         tree = ast.parse(analyzer.source)
-        analyzer.set_skip_node(tree)
+        analyzer.set_extra_attr(tree)
         nodes = list(ast.walk(tree))
         self.assertFalse(nodes[0].skip)
         self.assertFalse(nodes[1].skip)

@@ -14,7 +14,7 @@ def read(path: Path) -> Tuple[str, str]:
         with tokenize.open(path) as stream:
             source = stream.read()
             encoding = stream.encoding
-    except (OSError, SyntaxError) as err:
+    except (OSError, SyntaxError):
         return "", "utf-8"
     return source, encoding
 
