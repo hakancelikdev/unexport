@@ -1,4 +1,4 @@
-**Pyall is a linter that tries to keep the **all ** in your Python modules always up to
+**Pyall is a linter that tries to keep the `__all__` in your Python modules always up to
 date.**
 
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/hakancelik96/pyall/master.svg)](https://results.pre-commit.ci/latest/github/hakancelik96/pyall/master)
