@@ -27,7 +27,6 @@ repos:
     rev: v0.800
     hooks:
       - id: mypy
-        args: [--no-strict-optional, --ignore-missing-imports]
 
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v2.2.1
@@ -47,9 +46,21 @@ repos:
     rev: v2.10.0
     hooks:
       - id: pyupgrade
-        args: [--py36-plus]
+        args: [--py38-plus]
 
-  - repo: https://github.com/isidentical/teyit
-    rev: 2eaaabed645b33822de0e310851c0c7abfaa500b
+  - repo: https://github.com/pycqa/flake8
+    rev: "3.9.0"
     hooks:
-      - id: teyit
+      - id: flake8
+
+  - repo: local
+    hooks:
+      - id: pyall
+        name: pyall
+        description:
+          "Pyall is a linter that tries to keep the __all __ in your Python modules
+          always up to date."
+        entry: python -m pyall --refactor
+        language: python
+        language_version: python3
+        types: [python]
