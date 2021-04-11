@@ -1,8 +1,8 @@
 <!-- _coverpage.md -->
 
-# <small>Under development</small>
+# <small>0.1.0</small>
 
-> Pyall is a linter that tries to keep the **all ** in your Python modules always up to
+> Pyall is a linter that tries to keep the `__all__` in your Python modules always up to
 > date.
 
 - [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/hakancelik96/pyall/master.svg)](https://results.pre-commit.ci/latest/github/hakancelik96/pyall/master)
@@ -22,5 +22,5 @@
 [![Contributors](https://img.shields.io/github/contributors/hakancelik96/pyall)](https://github.com/hakancelik96/pyall/graphs/contributors)
 [![Last Commit](https://img.shields.io/github/last-commit/hakancelik96/pyall.svg)](https://github.com/hakancelik96/pyall/commits/master)
 
-[GitHub](https://github.com/hakancelik96/pyall/) [Telegram](https://t.me/pyall)
+[GitHub](https://github.com/hakancelik96/pyall/) [Telegram](https://t.me/py_all)
 [Discord](https://discord.gg/6z8YXy4) [Get Started](#get-started)
