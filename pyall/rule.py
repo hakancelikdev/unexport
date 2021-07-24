@@ -73,6 +73,10 @@ class Rule:
             return True
 
 
+def _rule_node_add(node) -> bool:
+    return node.add is True if hasattr(node, "add") else False
+
+
 @Rule.register(  # type: ignore
     (  # type: ignore
         ast.ClassDef,
@@ -93,18 +97,6 @@ def _rule_node_skip(node) -> bool:
         ast.Name,
     )
 )
-def _rule_node_add(node) -> bool:
-    return node.add is True if hasattr(node, "add") else True
-
-
-@Rule.register(  # type: ignore
-    (  # type: ignore
-        ast.ClassDef,
-        ast.FunctionDef,
-        ast.AsyncFunctionDef,
-        ast.Name,
-    )
-)
 def _rule_parent_not_def(node) -> bool:
     return not first_occurrence(
         node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
@@ -114,20 +106,25 @@ def _rule_parent_not_def(node) -> bool:
 @Rule.register(  # type: ignore
     (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)  # type: ignore
 )
-def _rule_def_name(node) -> bool:
-    return not node.name.startswith("_")
+def _rule_underscore_name(node) -> bool:
+    is_underscore = node.name.startswith("_")
+    is_add = _rule_node_add(node)
+
+    return not is_underscore or is_add
 
 
 @Rule.register((ast.Name,))  # type: ignore
 def _rule_name_name(node) -> bool:
-    return (
-        node.id.isupper() or node.id[0].isupper()
-    ) and not node.id.startswith("_")
+    is_upper = node.id.isupper()
+    is_underscore = node.id.startswith("_")
+    is_add = _rule_node_add(node)
+
+    return (is_upper and not is_underscore) or is_add
 
 
 @Rule.register((ast.Name,))  # type: ignore
 def _rule_name_ctx(node) -> bool:
-    return isinstance(node.ctx, ast.Store)
+    return isinstance(node.ctx, ast.Store) or _rule_node_add(node)
 
 
 @Rule.register((ast.Assign,))  # type: ignore

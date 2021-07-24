@@ -99,6 +99,12 @@ class Analyzer:
             if isinstance(node, C.ALL_NODE) and node.lineno in add:
                 node.add = True  # type: ignore
 
+            assert (
+                hasattr(node, "add")
+                and node.add is True  # type: ignore
+                and node.skip is True  # type: ignore
+            ) is False, "Please do not use both options at the same time."
+
     @property
     def actual_all(self):
         return sorted(self.all_item_analyzer.actual_all)
