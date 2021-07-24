@@ -37,7 +37,19 @@ setup(
     python_requires=">=3.8",
     packages=["pyall"],
     install_requires=[],
-    extras_require={},
+    extras_require={
+        "docs": [
+            "mkdocs==1.2.1",
+            "mkdocs-material==7.1.9",
+            "mkdocs-markdownextradata-plugin==0.2.4",
+            "mkdocs-minify-plugin==0.4.0",
+            "mkdocs-git-revision-date-localized-plugin==0.9.2",
+        ],
+        "dev": [
+            "pytest==6.2.4",
+            "pytest-cov==2.12.1",
+        ],
+    },
     zip_safe=False,
     include_package_data=True,
     classifiers=[

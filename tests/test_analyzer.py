@@ -47,6 +47,17 @@ class AnalyzerVariableTestCase(unittest.TestCase):
         self.assertFalse(analyzer.actual_all)
         self.assertFalse(analyzer.expected_all)
 
+    def test_public_comment(self):
+        source = textwrap.dedent(
+            """\
+                test_var = 1 # pyall: public
+            """
+        )
+        analyzer = Analyzer(source=source)
+        analyzer.traverse()
+        self.assertFalse(analyzer.actual_all)
+        self.assertListEqual(analyzer.expected_all, ["test_var"])
+
 
 class AnalyzerFunctionTestCase(unittest.TestCase):
     def test_primitive_function(self):

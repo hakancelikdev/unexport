@@ -47,7 +47,7 @@ cases = [
                 KEY = "VALUE"
             """,
         """\
-                __all__ = ['KEY', 'Key']
+                __all__ = ['KEY']
 
                 key = "value"
                 _key = "_value"

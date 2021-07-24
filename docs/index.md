@@ -28,6 +28,117 @@ packaging tools. We recommend installing the latest stable release from PyPI wit
 $ pip install pyall
 ```
 
+## Sources
+
+> (optional: default `the file directory you are in`) -> `Path(".")`
+
+You can give as many file or directory paths as you want.
+
+**Usage**
+
+- `$ pyall`
+- `$ pyall example`
+- `$ pyall example example1 example2 example/example.py`
+
+## Include
+
+> (optional: default '\\.(py)$') file include pattern
+
+**Usage**
+
+- `$ pyall --include mypackage`
+- `$ pyall --include "mypackage|tests`
+
+## Exclude
+
+> (optional: default '^$') file exclude pattern
+
+**Usage**
+
+- `$ pyall --exclude __init__.py`
+- `$ pyall --exclude "__init__.py|tests|.tox`
+
+## Default public states.
+
+- Variables are defined with an upper letters.
+
+```python
+VARIABLE = "variable"
+
+PUBLIC_VARIABLE = "variable"
+```
+
+- functions, or classes that do not begin with an underscore are public.
+
+```python
+
+def function():
+  ...
+
+
+class Klass:
+  ...
+
+```
+
+### Make It not-public
+
+Write the comment `# pyall: not-public` on the line containing the variable, function
+and class that you want to make public.
+
+```python
+
+VARIABLE = "variable" # pyall: not-public
+
+def function(): # pyall: not-public
+  ...
+
+class Klass: # pyall: not-public
+  ...
+
+```
+
+## Default not-public states.
+
+- The variable is not public unless all characters are uppercase.
+
+```python
+variable = "variable"
+
+Variable = "variable"
+
+```
+
+- Variables, functions, and classes that begin with an underscore are not public.
+
+```python
+_VARIABLE = "variable"
+
+def _function():
+  ...
+
+class _Klass:
+  ...
+
+```
+
+### Make It Public
+
+Write the comment `# pyall: public` on the line containing the variable, function and
+class that you want to make public.
+
+```python
+
+_variable = "variable" # pyall: public
+
+def _function(): # pyall: public
+  ...
+
+class _Klass: # pyall: public
+  ...
+
+```
+
 ### Command line options
 
 You can list many options by running pyall --help
@@ -65,4 +176,50 @@ repos:
     hooks:
       - id: pyall
         args: [--refactor]
+```
+
+## Examples
+
+**/example.py**
+
+```python
+
+PUBLIC_VARIABLE = "variable"
+
+def _not_public_function():
+  ...
+
+class PublicKlass:
+  ...
+
+
+class _NotPublicKlass:
+  ...
+
+
+public_variable = "variable" # pyall: public
+
+```
+
+> Command line: `$ pyall /example.py -r`
+
+**Output**
+
+```python
+__all__ = ['PUBLIC_VARIABLE', 'PublicKlass', 'public_variable']
+
+PUBLIC_VARIABLE = "variable"
+
+def _not_public_function():
+  ...
+
+class PublicKlass:
+  ...
+
+
+class _NotPublicKlass:
+  ...
+
+
+public_variable = "variable" # pyall: public
 ```
