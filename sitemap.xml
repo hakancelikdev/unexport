@@ -6,17 +6,17 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://pyall.hakancelik.dev/authors/</loc>
+         <loc>https://pyall.hakancelik.dev/AUTHORS/</loc>
          <lastmod>2022-06-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://pyall.hakancelik.dev/changelog/</loc>
+         <loc>https://pyall.hakancelik.dev/CHANGELOG/</loc>
          <lastmod>2022-06-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://pyall.hakancelik.dev/contributing/</loc>
+         <loc>https://pyall.hakancelik.dev/CONTRIBUTING/</loc>
          <lastmod>2022-06-16</lastmod>
          <changefreq>daily</changefreq>
     </url>
