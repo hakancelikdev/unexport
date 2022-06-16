@@ -1,6 +1,6 @@
 ## Authors
 
-- Hakan Çelik (@hakancelik96) <hakancelik96@outlook.com>
+- Hakan Çelik (@hakancelikdev) <contact@hakancelik.dev>
 
 ## Contributors
 

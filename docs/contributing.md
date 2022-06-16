@@ -6,11 +6,11 @@ To make an improvement, add a new feature or anything else, please open a issue 
 
 **Good first issues are the issues that you can quickly solve, we recommend you take a
 look.**
-[Good first issue](https://github.com/hakancelik96/pyall/labels/good%20first%20issue)
+[Good first issue](https://github.com/hakancelikdev/pyall/labels/good%20first%20issue)
 
 ## Fork Repository
 
-[fork the pyall.](https://github.com/hakancelik96/pyall/fork)
+[fork the pyall.](https://github.com/hakancelikdev/pyall/fork)
 
 ## Clone Repository
 
@@ -28,14 +28,14 @@ git checkout -b i{your issue number}
 ## How to Update My Local Repository
 
 ```shell
-$ git remote add upstream git@github.com:hakancelik96/pyall.git
+$ git remote add upstream git@github.com:hakancelikdev/pyall.git
 $ git fetch upstream # or git fetch --all
 $ git rebase upstream/master
 ```
 
 ## Testing
 
-Firstly make sure you have 3.8 and 3.9 python versions installed on your system.
+Firstly make sure you have 3.8, 3.9 and 3.10 python versions installed on your system.
 
 After typing your codes, you should run the tests by typing the following command.
 

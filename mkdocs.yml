@@ -67,10 +67,10 @@ extra:
       link: https://discord.com/invite/6z8YXy4
 
     - icon: fontawesome/brands/twitter
-      link: https://twitter.com/hakancelik96
+      link: https://twitter.com/hakancelikdev
 
     - icon: fontawesome/brands/linkedin
-      link: https://www.linkedin.com/in/hakancelik96
+      link: https://www.linkedin.com/in/hakancelikdev
 
     - icon: fontawesome/solid/globe
       link: https://hakancelik.dev
@@ -115,9 +115,9 @@ theme:
     repo: fontawesome/brands/github
 
 copyright: Copyright &copy; 2020 - 2020 Hakan Çelik
-repo_url: https://github.com/hakancelik96/pyall
-repo_name: hakancelik96/pyall
-edit_uri: https://github.com/hakancelik96/pyall/tree/master/docs
+repo_url: https://github.com/hakancelikdev/pyall
+repo_name: hakancelikdev/pyall
+edit_uri: https://github.com/hakancelikdev/pyall/tree/master/docs
 
 nav:
   - Home: index.md
