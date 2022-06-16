@@ -1,20 +1,20 @@
 **Pyall is a linter that tries to keep the `__all__` in your Python modules always up to
 date.**
 
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/hakancelik96/pyall/master.svg)](https://results.pre-commit.ci/latest/github/hakancelik96/pyall/master)
-[![test](https://github.com/hakancelik96/pyall/actions/workflows/tests.yml/badge.svg)](https://github.com/hakancelik96/pyall/actions/workflows/tests.yml)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/hakancelikdev/pyall/master.svg)](https://results.pre-commit.ci/latest/github/hakancelikdev/pyall/master)
+[![test](https://github.com/hakancelikdev/pyall/actions/workflows/tests.yml/badge.svg)](https://github.com/hakancelikdev/pyall/actions/workflows/tests.yml)
 
 [![Pypi](https://img.shields.io/pypi/v/pyall)](https://pypi.org/project/pyall/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyall)
 [![Downloads](https://static.pepy.tech/personalized-badge/pyall?period=total&units=none&left_color=grey&right_color=red&left_text=downloads)](https://pepy.tech/project/pyall)
-[![License](https://img.shields.io/github/license/hakancelik96/pyall.svg)](https://github.com/hakancelik96/pyall/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/hakancelikdev/pyall.svg)](https://github.com/hakancelikdev/pyall/blob/master/LICENSE)
 
-[![Forks](https://img.shields.io/github/forks/hakancelik96/pyall)](https://github.com/hakancelik96/pyall/fork)
-[![Issues](https://img.shields.io/github/issues/hakancelik96/pyall)](https://github.com/hakancelik96/pyall/issues)
-[![Stars](https://img.shields.io/github/stars/hakancelik96/pyall)](https://github.com/hakancelik96/pyall/stargazers)
+[![Forks](https://img.shields.io/github/forks/hakancelikdev/pyall)](https://github.com/hakancelikdev/pyall/fork)
+[![Issues](https://img.shields.io/github/issues/hakancelikdev/pyall)](https://github.com/hakancelikdev/pyall/issues)
+[![Stars](https://img.shields.io/github/stars/hakancelikdev/pyall)](https://github.com/hakancelikdev/pyall/stargazers)
 
-[![Codecov](https://codecov.io/gh/hakancelik96/pyall/branch/master/graph/badge.svg)](https://codecov.io/gh/hakancelik96/pyall)
-[![Contributors](https://img.shields.io/github/contributors/hakancelik96/pyall)](https://github.com/hakancelik96/pyall/graphs/contributors)
-[![Last Commit](https://img.shields.io/github/last-commit/hakancelik96/pyall.svg)](https://github.com/hakancelik96/pyall/commits/master)
+[![Codecov](https://codecov.io/gh/hakancelikdev/pyall/branch/master/graph/badge.svg)](https://codecov.io/gh/hakancelikdev/pyall)
+[![Contributors](https://img.shields.io/github/contributors/hakancelikdev/pyall)](https://github.com/hakancelikdev/pyall/graphs/contributors)
+[![Last Commit](https://img.shields.io/github/last-commit/hakancelikdev/pyall.svg)](https://github.com/hakancelikdev/pyall/commits/master)
 
 For more information see: https://pyall.hakancelik.dev/

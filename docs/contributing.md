@@ -6,11 +6,11 @@ To make an improvement, add a new feature or anything else, please open a issue 
 
 **Good first issues are the issues that you can quickly solve, we recommend you take a
 look.**
-[Good first issue](https://github.com/hakancelik96/pyall/labels/good%20first%20issue)
+[Good first issue](https://github.com/hakancelikdev/pyall/labels/good%20first%20issue)
 
 ## Fork Repository
 
-[fork the pyall.](https://github.com/hakancelik96/pyall/fork)
+[fork the pyall.](https://github.com/hakancelikdev/pyall/fork)
 
 ## Clone Repository
 
@@ -28,7 +28,7 @@ git checkout -b i{your issue number}
 ## How to Update My Local Repository
 
 ```shell
-$ git remote add upstream git@github.com:hakancelik96/pyall.git
+$ git remote add upstream git@github.com:hakancelikdev/pyall.git
 $ git fetch upstream # or git fetch --all
 $ git rebase upstream/master
 ```
@@ -49,8 +49,8 @@ If all tests pass.
 ## The final step
 
 After adding a new feature or fixing a bug please report your change to
-[CHANGELOG.md](CHANGELOG.md) and write your name, GitHub address, and email in the
-[AUTHORS.md](AUTHORS.md) file in alphabetical order.
+[changelog.md](changelog.md) and write your name, GitHub address, and email in the
+[authors.md](authors.md) file in alphabetical order.
 
 ### Commit Messages
 
