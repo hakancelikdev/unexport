@@ -30,12 +30,12 @@ git checkout -b i{your issue number}
 ```shell
 $ git remote add upstream git@github.com:hakancelikdev/pyall.git
 $ git fetch upstream # or git fetch --all
-$ git rebase upstream/master
+$ git rebase upstream/main
 ```
 
 ## Testing
 
-Firstly make sure you have 3.8 and 3.9 python versions installed on your system.
+Firstly make sure you have 3.8, 3.9 and 3.10 python versions installed on your system.
 
 After typing your codes, you should run the tests by typing the following command.
 

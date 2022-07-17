@@ -121,7 +121,7 @@ theme:
 copyright: Copyright &copy; 2020 - 2020 Hakan Çelik
 repo_url: https://github.com/hakancelikdev/pyall
 repo_name: hakancelikdev/pyall
-edit_uri: https://github.com/hakancelikdev/pyall/tree/master/docs
+edit_uri: https://github.com/hakancelikdev/pyall/tree/main/docs
 
 nav:
   - Home: index.md

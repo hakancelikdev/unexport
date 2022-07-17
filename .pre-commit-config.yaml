@@ -52,15 +52,3 @@ repos:
     rev: "4.0.1"
     hooks:
       - id: flake8
-
-  - repo: local
-    hooks:
-      - id: pyall
-        name: pyall
-        description:
-          "Pyall is a linter that tries to keep the __all __ in your Python modules
-          always up to date."
-        entry: python -m pyall --refactor
-        language: python
-        language_version: python3
-        types: [python]

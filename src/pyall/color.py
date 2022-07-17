@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import sys
-from typing import Tuple
 
 __all__ = [
     "BLACK",
@@ -85,7 +86,7 @@ def paint(content: str, color: str) -> str:
         return content
 
 
-def diff(content: Tuple[str, ...]) -> str:  # pragma: no cover
+def diff(content: tuple[str, ...]) -> str:  # pragma: no cover
     lines = list(content)
     for i, line in enumerate(lines):
         if line.startswith("+++") or line.startswith("---"):

@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import ast
-from typing import Iterator, Optional
+from typing import Iterator
 
 __all__ = ["first_occurrence", "get_parents", "relate"]
 
 
-def relate(tree: ast.AST, parent: Optional[ast.AST] = None) -> None:
+def relate(tree: ast.AST, parent: ast.AST | None = None) -> None:
     tree.parent = parent  # type: ignore
     for node in ast.walk(tree):
         for child in ast.iter_child_nodes(node):

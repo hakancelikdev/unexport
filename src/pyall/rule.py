@@ -5,7 +5,7 @@ import functools
 from dataclasses import dataclass
 from typing import Callable, ClassVar, Iterator, NamedTuple, cast
 
-from pyall import constants as C
+from pyall import typing as T
 from pyall.relate import first_occurrence
 
 __all__ = ["Rule"]
@@ -25,12 +25,12 @@ class Rule:
     rules: ClassVar[list[_DefineRule]] = []
 
     @classmethod
-    def register(cls, nodes: tuple[ast.AST, ...]) -> C.Function:
-        def f(function: C.Function) -> None:
+    def register(cls, nodes: tuple[ast.AST, ...]) -> T.Function:
+        def f(function: T.Function) -> None:
             cls.validate_rule(function)
             cls.rules.append(_DefineRule(nodes=nodes, function=function))
 
-        return cast(C.Function, f)
+        return cast(T.Function, f)
 
     @classmethod
     def filter_by_node(
@@ -41,19 +41,15 @@ class Rule:
                 yield rule.function  # type: ignore
 
     @classmethod
-    def apply(cls, func: C.Function) -> C.Function:
+    def apply(cls, func: T.Function) -> T.Function:
         @functools.wraps(func)
         def wrapper(*args, **kwargs) -> None:
-            obj = args[0]
-            node = args[1]
-
-            check_rules = all(rule(node) for rule in cls.filter_by_node(node))
-            if check_rules:
+            obj, node = args[0], args[1]
+            if all(rule(node) for rule in cls.filter_by_node(node)):
                 func(*args, **kwargs)
-            else:
-                obj.generic_visit(node)
+            obj.generic_visit(node)
 
-        return cast(C.Function, wrapper)
+        return cast(T.Function, wrapper)
 
     @classmethod
     def validate_rule(cls, function: Callable[[ast.AST], bool]) -> bool:

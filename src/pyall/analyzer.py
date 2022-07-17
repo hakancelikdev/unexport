@@ -1,11 +1,13 @@
+from __future__ import annotations
+
 import ast
 import io
 import re
 import tokenize
 from dataclasses import dataclass, field
-from typing import Set
 
 from pyall import constants as C
+from pyall import typing as T
 from pyall.relate import relate
 from pyall.rule import Rule
 
@@ -14,27 +16,24 @@ __all__ = ["Analyzer"]
 
 @dataclass
 class _AllItemAnalyzer(ast.NodeVisitor):
-    actual_all: Set[str] = field(default_factory=set)
-    classes: Set[str] = field(default_factory=set)
-    functions: Set[str] = field(default_factory=set)
-    variables: Set[str] = field(default_factory=set)
+    actual_all: set[str] = field(default_factory=set)
+    classes: set[str] = field(default_factory=set)
+    functions: set[str] = field(default_factory=set)
+    variables: set[str] = field(default_factory=set)
 
     @Rule.apply
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         self.classes.add(node.name)
-        self.generic_visit(node)
 
     @Rule.apply
-    def visit_FunctionDef(self, node: C.ASTFunctionT) -> None:
+    def visit_FunctionDef(self, node: T.ASTFunctionT) -> None:
         self.functions.add(node.name)
-        self.generic_visit(node)
 
     visit_AsyncFunctionDef = visit_FunctionDef
 
     @Rule.apply
     def visit_Name(self, node: ast.Name) -> None:
         self.variables.add(node.id)
-        self.generic_visit(node)
 
     @Rule.apply
     def visit_Assign(self, node: ast.Assign) -> None:
@@ -44,7 +43,6 @@ class _AllItemAnalyzer(ast.NodeVisitor):
                 self.actual_all.add(str(item.value))
             elif isinstance(item, ast.Str):
                 self.actual_all.add(item.s)
-        self.generic_visit(node)
 
     @Rule.apply
     def visit_Expr(self, node: ast.Expr) -> None:
@@ -64,7 +62,6 @@ class _AllItemAnalyzer(ast.NodeVisitor):
                             self.actual_all.add(str(item.value))
                         elif isinstance(item, ast.Str):
                             self.actual_all.add(item.s)
-        self.generic_visit(node)
 
 
 @dataclass

@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import ast
-from typing import List, NamedTuple
+from typing import NamedTuple
 
 __all__ = ["refactor_source"]
 
@@ -31,7 +33,7 @@ def _find_location(source: str) -> _Location:
     return location
 
 
-def refactor_source(source: str, expected_all: List[str]) -> str:
+def refactor_source(source: str, expected_all: list[str]) -> str:
     if not expected_all:
         return source
     location = _find_location(source)

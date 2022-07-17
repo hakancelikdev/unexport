@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator, List, Tuple
+from typing import Iterator
 
 from pyall import utils
 from pyall.analyzer import Analyzer
@@ -14,7 +16,7 @@ __all__ = ["Session"]
 class Session:
     config: Config
 
-    def get_source(self, path: Path) -> Iterator[Tuple[str, Path]]:
+    def get_source(self, path: Path) -> Iterator[tuple[str, Path]]:
         for py_path in utils.list_paths(
             path, include=self.config.include, exclude=self.config.exclude
         ):
@@ -22,7 +24,7 @@ class Session:
             yield source, py_path
 
     @staticmethod
-    def get_expected_all(source: str) -> Tuple[bool, List[str]]:
+    def get_expected_all(source: str) -> tuple[bool, list[str]]:
         analyzer = Analyzer(source=source)
         analyzer.traverse()
         match = analyzer.actual_all == analyzer.expected_all

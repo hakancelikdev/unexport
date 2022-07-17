@@ -1,15 +1,17 @@
+from __future__ import annotations
+
 import difflib
 import re
 import tokenize
 from pathlib import Path
-from typing import Iterable, Iterator, List, Tuple
+from typing import Iterable, Iterator
 
 from pyall import constants as C
 
 __all__ = ["diff", "list_paths", "read"]
 
 
-def read(path: Path) -> Tuple[str, str]:
+def read(path: Path) -> tuple[str, str]:
     try:
         with tokenize.open(path) as stream:
             source = stream.read()
@@ -38,8 +40,8 @@ def list_paths(
 
 
 def diff(
-    *, action: List[str], expected: List[str], fromfile: Path = None
-) -> Tuple[str, ...]:
+    *, action: list[str], expected: list[str], fromfile: Path = None
+) -> tuple[str, ...]:
     return tuple(
         difflib.unified_diff(
             action,

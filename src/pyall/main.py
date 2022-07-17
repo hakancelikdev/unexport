@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import argparse
 import sys
 from pathlib import Path
-from typing import Optional, Sequence
+from typing import Sequence
 
-from pyall import color
+from pyall import __description__, __version__, color
 from pyall import constants as C
 from pyall import utils
 from pyall.config import Config
@@ -12,10 +14,10 @@ from pyall.session import Session
 __all__ = ["main"]
 
 
-def main(argv: Optional[Sequence[str]] = None) -> int:
+def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="Pyall",
-        description=C.DESCRIPTION,
+        description=__description__,
     )
     parser.add_argument(
         "sources",
@@ -57,7 +59,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "-v",
         "--version",
         action="version",
-        version=f"Pyall {C.VERSION}",
+        version=f"Pyall {__version__}",
         help="Prints version of pyall",
     )
     argv = argv if argv is not None else sys.argv[1:]
@@ -103,4 +105,4 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())
