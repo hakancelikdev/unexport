@@ -8,7 +8,7 @@ from typing import Iterable, Iterator
 
 from pyall import constants as C
 
-__all__ = ["diff", "list_paths", "read"]
+__all__ = ("diff", "list_paths", "read")
 
 
 def read(path: Path) -> tuple[str, str]:

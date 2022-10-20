@@ -1,13 +1,13 @@
 import ast
 
-__all__ = [
+__all__ = (
     "ADD_COMMENTS_REGEX_PATTERN",
     "ALL_NODE",
     "EXCLUDE_REGEX_PATTERN",
     "GLOB_PATTERN",
     "INCLUDE_REGEX_PATTERN",
     "SKIP_COMMENTS_REGEX_PATTERN",
-]
+)
 
 # TUPLE
 ALL_NODE = (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef, ast.Name)

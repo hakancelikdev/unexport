@@ -3,7 +3,7 @@ from __future__ import annotations
 import ast
 from typing import NamedTuple
 
-__all__ = ["refactor_source"]
+__all__ = ("refactor_source", )
 
 
 class _Location(NamedTuple):
