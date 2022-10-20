@@ -8,7 +8,7 @@ from typing import Callable, ClassVar, Iterator, NamedTuple, cast
 from pyall import typing as T
 from pyall.relate import first_occurrence
 
-__all__ = ["Rule"]
+__all__ = ("Rule", )
 
 
 class InvalidRuleFunctionError(BaseException):  # pyall: not-public

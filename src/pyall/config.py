@@ -4,7 +4,7 @@ from typing import NamedTuple
 
 from pyall import constants as C
 
-__all__ = ["Config"]
+__all__ = ("Config",)
 
 
 class Config(NamedTuple):

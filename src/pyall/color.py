@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import sys
 
-__all__ = [
+__all__ = (
     "BLACK",
     "BLUE",
     "BOLD_WHITE",
@@ -16,7 +16,7 @@ __all__ = [
     "YELLOW",
     "diff",
     "paint",
-]
+)
 
 if sys.platform == "win32":  # pragma: no cover (windows)
 

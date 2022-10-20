@@ -11,7 +11,7 @@ from pyall import utils
 from pyall.config import Config
 from pyall.session import Session
 
-__all__ = ["main"]
+__all__ = ("main",)
 
 
 def main(argv: Sequence[str] | None = None) -> int:

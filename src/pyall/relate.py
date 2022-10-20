@@ -3,7 +3,7 @@ from __future__ import annotations
 import ast
 from typing import Iterator
 
-__all__ = ["first_occurrence", "get_parents", "relate"]
+__all__ = ("first_occurrence", "get_parents", "relate")
 
 
 def relate(tree: ast.AST, parent: ast.AST | None = None) -> None:
