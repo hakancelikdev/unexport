@@ -9,7 +9,7 @@ from pyall.analyzer import Analyzer
 from pyall.config import Config
 from pyall.refactor import refactor_source
 
-__all__ = ("Session", )
+__all__ = ("Session",)
 
 
 @dataclass

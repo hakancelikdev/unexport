@@ -11,7 +11,7 @@ from pyall import typing as T
 from pyall.relate import relate
 from pyall.rule import Rule
 
-__all__ = ("Analyzer", )
+__all__ = ("Analyzer",)
 
 
 @dataclass
