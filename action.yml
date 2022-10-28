@@ -1,0 +1,21 @@
+# action.yml
+name: "pyall"
+description:
+  "Pyall is a linter that tries to keep the `__all__` in your Python modules always up
+  to date."
+
+inputs:
+  extra_args:
+    description: "options to pass to pyall run"
+    required: false
+    default: "--check"
+runs:
+  using: "composite"
+  steps:
+    - run: pip install --upgrade pip && python -m pip install pyall==0.3.2
+      shell: bash
+    - run: pyall  ${{ inputs.extra_args }}
+      shell: bash
+branding:
+  icon: "check"
+  color: "red"

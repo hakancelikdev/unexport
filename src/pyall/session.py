@@ -9,7 +9,7 @@ from pyall.analyzer import Analyzer
 from pyall.config import Config
 from pyall.refactor import refactor_source
 
-__all__ = ("Session", )
+__all__ = ("Session",)
 
 
 @dataclass
@@ -17,9 +17,7 @@ class Session:
     config: Config
 
     def get_source(self, path: Path) -> Iterator[tuple[str, Path]]:
-        for py_path in utils.list_paths(
-            path, include=self.config.include, exclude=self.config.exclude
-        ):
+        for py_path in utils.list_paths(path, include=self.config.include, exclude=self.config.exclude):
             source, _ = utils.read(py_path)
             yield source, py_path
 

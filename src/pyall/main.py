@@ -80,9 +80,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 exit_code = 1
             if args.refactor:
                 session.refactor(path=py_path, apply=True)
-                print(
-                    f"Refactoring '{color.paint(str(py_path), color.GREEN)}'"
-                )
+                print(f"Refactoring '{color.paint(str(py_path), color.GREEN)}'")
             if args.diff:
                 new_source = session.refactor(path=py_path, apply=False)
                 diff = utils.diff(

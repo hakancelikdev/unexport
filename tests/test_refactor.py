@@ -15,9 +15,7 @@ __all__ = ["reopenable_temp_file", "test_refactor"]
 @contextmanager
 def reopenable_temp_file(content: str) -> Iterator[Path]:
     try:
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".py", encoding="utf-8", delete=False
-        ) as tmp:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", encoding="utf-8", delete=False) as tmp:
             tmp_path = Path(tmp.name)
             tmp.write(content)
         yield tmp_path
@@ -149,6 +147,4 @@ cases = [
 
 @pytest.mark.parametrize("action,expected", cases)
 def test_refactor(action: str, expected: str):
-    assert (
-        _is_equal_source_to_refactor(action, expected) is True
-    ), "Action source is not equal to after refactoring"
+    assert _is_equal_source_to_refactor(action, expected) is True, "Action source is not equal to after refactoring"

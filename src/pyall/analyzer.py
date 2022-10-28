@@ -11,7 +11,7 @@ from pyall import typing as T
 from pyall.relate import relate
 from pyall.rule import Rule
 
-__all__ = ("Analyzer", )
+__all__ = ("Analyzer",)
 
 
 @dataclass
@@ -67,9 +67,7 @@ class _AllItemAnalyzer(ast.NodeVisitor):
 @dataclass
 class Analyzer:
     source: str
-    all_item_analyzer: _AllItemAnalyzer = field(
-        init=False, default_factory=_AllItemAnalyzer
-    )
+    all_item_analyzer: _AllItemAnalyzer = field(init=False, default_factory=_AllItemAnalyzer)
 
     def traverse(self) -> None:
         tree = ast.parse(self.source)
