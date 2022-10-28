@@ -33,15 +33,12 @@ def list_paths(
     else:
         file_names = [start]
     yield from filter(
-        lambda filename: include_regex.search(filename.as_posix())
-        and not exclude_regex.search(filename.as_posix()),
+        lambda filename: include_regex.search(filename.as_posix()) and not exclude_regex.search(filename.as_posix()),
         file_names,
     )
 
 
-def diff(
-    *, action: list[str], expected: list[str], fromfile: Path = None
-) -> tuple[str, ...]:
+def diff(*, action: list[str], expected: list[str], fromfile: Path = None) -> tuple[str, ...]:
     return tuple(
         difflib.unified_diff(
             action,

@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import ast
+import dataclasses
 import functools
-from dataclasses import dataclass
 from typing import Callable, ClassVar, Iterator, NamedTuple, cast
 
 from pyall import typing as T
 from pyall.relate import first_occurrence
 
-__all__ = ("Rule", )
+__all__ = ("Rule",)
 
 
 class InvalidRuleFunctionError(BaseException):  # pyall: not-public
@@ -20,12 +20,12 @@ class _DefineRule(NamedTuple):
     function: Callable[[ast.AST], bool]
 
 
-@dataclass
+@dataclasses.dataclass
 class Rule:
     rules: ClassVar[list[_DefineRule]] = []
 
     @classmethod
-    def register(cls, nodes: tuple[ast.AST, ...]) -> T.Function:
+    def register(cls, nodes: tuple[ast.AST, ...]) -> T.Function:  # type: ignore
         def f(function: T.Function) -> None:
             cls.validate_rule(function)
             cls.rules.append(_DefineRule(nodes=nodes, function=function))
@@ -33,9 +33,7 @@ class Rule:
         return cast(T.Function, f)
 
     @classmethod
-    def filter_by_node(
-        cls, node: tuple[ast.AST, ...]
-    ) -> Iterator[Callable[[ast.AST], bool]]:
+    def filter_by_node(cls, node: tuple[ast.AST, ...]) -> Iterator[Callable[[ast.AST], bool]]:
         for rule in cls.rules:
             if isinstance(node, rule.nodes):  # type: ignore
                 yield rule.function  # type: ignore
@@ -54,17 +52,11 @@ class Rule:
     @classmethod
     def validate_rule(cls, function: Callable[[ast.AST], bool]) -> bool:
         if not function.__name__.startswith("_rule_"):
-            raise InvalidRuleFunctionError(
-                "Rule function name must start with '_rule_'."
-            )
+            raise InvalidRuleFunctionError("Rule function name must start with '_rule_'.")
         elif not function.__code__.co_argcount == 1:
-            raise InvalidRuleFunctionError(
-                "Rule function only gets one argument."
-            )
+            raise InvalidRuleFunctionError("Rule function only gets one argument.")
         elif not function.__code__.co_varnames[0] == "node":
-            raise InvalidRuleFunctionError(
-                "The parameter name must be 'node'."
-            )
+            raise InvalidRuleFunctionError("The parameter name must be 'node'.")
         else:
             return True
 
@@ -102,9 +94,7 @@ def _rule_node_add(node) -> bool:
     )
 )
 def _rule_parent_not_def(node) -> bool:
-    return not first_occurrence(
-        node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
-    )
+    return not first_occurrence(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
 
 
 @Rule.register(  # type: ignore
@@ -116,9 +106,7 @@ def _rule_def_name(node) -> bool:
 
 @Rule.register((ast.Name,))  # type: ignore
 def _rule_name_name(node) -> bool:
-    return (
-        node.id.isupper() or node.id[0].isupper()
-    ) and not node.id.startswith("_")
+    return (node.id.isupper() or node.id[0].isupper()) and not node.id.startswith("_")
 
 
 @Rule.register((ast.Name,))  # type: ignore
@@ -128,9 +116,7 @@ def _rule_name_ctx(node) -> bool:
 
 @Rule.register((ast.Assign,))  # type: ignore
 def _rule_node_is_all(node) -> bool:
-    return getattr(node.targets[0], "id", None) == "__all__" and isinstance(
-        node.value, (ast.List, ast.Tuple, ast.Set)
-    )
+    return getattr(node.targets[0], "id", None) == "__all__" and isinstance(node.value, (ast.List, ast.Tuple, ast.Set))
 
 
 @Rule.register((ast.Expr,))  # type: ignore

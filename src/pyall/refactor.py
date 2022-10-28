@@ -3,7 +3,7 @@ from __future__ import annotations
 import ast
 from typing import NamedTuple
 
-__all__ = ("refactor_source", )
+__all__ = ("refactor_source",)
 
 
 class _Location(NamedTuple):
@@ -16,19 +16,13 @@ def _find_location(source: str) -> _Location:
     location = _Location()
     tree = ast.parse(source)
     for node in tree.body:
-        if (
-            isinstance(node, ast.Assign)
-            and getattr(node.targets[0], "id", None) == "__all__"
-        ):
+        if isinstance(node, ast.Assign) and getattr(node.targets[0], "id", None) == "__all__":
             return location._replace(
                 start=node.lineno - 1,
                 end=node.end_lineno or 0,
                 all_exists=True,
             )
-        elif (
-            isinstance(node, (ast.Import, ast.ImportFrom))
-            and node.lineno > location.start
-        ):
+        elif isinstance(node, (ast.Import, ast.ImportFrom)) and node.lineno > location.start:
             location = location._replace(start=node.end_lineno or 0)
     return location
 
