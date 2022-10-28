@@ -106,6 +106,8 @@ def _rule_def_name(node) -> bool:
 
 @Rule.register((ast.Name,))  # type: ignore
 def _rule_name_name(node) -> bool:
+    if hasattr(node, "add"):
+        return node.add is True
     return (node.id.isupper() or node.id[0].isupper()) and not node.id.startswith("_")
 
 

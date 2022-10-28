@@ -43,7 +43,7 @@ cases = [
                 _key = "_value"
                 Key = "Value"
                 KEY = "VALUE"
-            """,
+        """,
         """\
                 __all__ = ["KEY", "Key"]
 
@@ -51,21 +51,33 @@ cases = [
                 _key = "_value"
                 Key = "Value"
                 KEY = "VALUE"
-            """,
+        """,
     ),
     (
         """\
                 import x
 
                 def func():...
-            """,
+        """,
         """\
                 import x
 
                 __all__ = ["func"]
 
                 def func():...
-            """,
+        """,
+    ),
+    (
+        """\
+                __all__ = ("var",)
+                
+                var = 1
+        """,
+        """\
+                __all__ = ("var",)
+                
+                var = 1
+        """,
     ),
     (
         """\
@@ -140,6 +152,30 @@ cases = [
 
             def x():...
 
+        """,
+    ),
+    (
+        """\
+            __all__ = ["x"]
+
+            x = 1  # pyall: public
+        """,
+        """\
+            __all__ = ["x"]
+
+            x = 1  # pyall: public
+        """,
+    ),
+    (
+        """\
+            __all__ = []
+
+            XXX = 1  # pyall: not-public
+        """,
+        """\
+            __all__ = []
+
+            XXX = 1  # pyall: not-public
         """,
     ),
 ]

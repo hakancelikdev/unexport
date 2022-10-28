@@ -7,31 +7,20 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-## [0.3.4] - 2022-10-28
-
-- Version fix
-
-## [0.3.3] - 2022-10-28
+## [0.3.5] - 2022-10-28
 
 ### Added
 
-- Python 3.11 support
+- Support Python3.11
+- Support Python3.10
+- Add py.typed
 - Github Action
 
 ### Changed
 
 - Single quotes to double quotes when refactoring
-
-## [0.3.1] - 2022-07-17
-
-### Added
-
-- Support Python3.10
-- Add py.typed
-
-### Changed
-
 - Apply src layout
+- Support tuple all
 
 ## [0.2.0] - 2021-04-11
 

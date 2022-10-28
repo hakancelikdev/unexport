@@ -37,7 +37,7 @@ class _AllItemAnalyzer(ast.NodeVisitor):
 
     @Rule.apply
     def visit_Assign(self, node: ast.Assign) -> None:
-        assert isinstance(node.value, ast.List)
+        assert isinstance(node.value, (ast.List, ast.Tuple))
         for item in node.value.elts:
             if isinstance(item, ast.Constant):
                 self.actual_all.add(str(item.value))
@@ -85,6 +85,7 @@ class Analyzer:
             if re.search(C.ADD_COMMENTS_REGEX_PATTERN, line, re.IGNORECASE):
                 lineno = start[0]
                 add.add(lineno)
+
         for node in ast.walk(tree):
             if isinstance(node, C.ALL_NODE) and node.lineno in skip:
                 node.skip = True  # type: ignore
