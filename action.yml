@@ -1,5 +1,5 @@
 # action.yml
-name: "pyall"
+name: "py-all"
 description:
   "Pyall is a linter that tries to keep the `__all__` in your Python modules always up
   to date."

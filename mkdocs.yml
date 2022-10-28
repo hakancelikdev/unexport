@@ -118,7 +118,7 @@ theme:
   icon:
     repo: fontawesome/brands/github
 
-copyright: Copyright &copy; 2020 - 2020 Hakan Çelik
+copyright: Copyright &copy; 2020 - 2020 Hakan Celik
 repo_url: https://github.com/hakancelikdev/pyall
 repo_name: hakancelikdev/pyall
 edit_uri: https://github.com/hakancelikdev/pyall/tree/main/docs
