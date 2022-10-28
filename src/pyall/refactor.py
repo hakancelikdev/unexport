@@ -38,9 +38,10 @@ def refactor_source(source: str, expected_all: list[str]) -> str:
             del lines[location.start : location.end]
         else:
             del lines[location.start]
-        lines.insert(location.start, f"__all__ = {str(expected_all)}\n")
-    else:
-        lines.insert(location.start, f"__all__ = {str(expected_all)}\n")
+
+    refactored_all = f"__all__ = {str(expected_all)}\n".replace("'", '"')
+    lines.insert(location.start, refactored_all)
+
     next_line = lines[location.start + 1]
     previous_line = lines[location.start - 1]
     if next_line != "\n":

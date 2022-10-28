@@ -7,11 +7,16 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-## [0.3.2] - 2022-10-28
+## [0.3.3] - 2022-10-28
 
 ### Added
 
 - Python 3.11 support
+- Github Action
+
+### Changed
+
+- Single quotes to double quotes when refactoring
 
 ## [0.3.1] - 2022-07-17
 

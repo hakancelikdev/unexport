@@ -45,7 +45,7 @@ cases = [
                 KEY = "VALUE"
             """,
         """\
-                __all__ = ['KEY', 'Key']
+                __all__ = ["KEY", "Key"]
 
                 key = "value"
                 _key = "_value"
@@ -62,7 +62,7 @@ cases = [
         """\
                 import x
 
-                __all__ = ['func']
+                __all__ = ["func"]
 
                 def func():...
             """,
@@ -81,17 +81,17 @@ cases = [
 
             import y
 
-            __all__ = ['t']
+            __all__ = ["t"]
 
             def t():
                 import tt
         """,
     ),
-    (  #  import & start != 0
+    (  # import & start != 0
         """\
             import x
 
-            __all__ = ['test']
+            __all__ = ["test"]
 
             def test():...
 
@@ -100,7 +100,7 @@ cases = [
         """\
             import x
 
-            __all__ = ['f', 'test']
+            __all__ = ["f", "test"]
 
             def test():...
 
@@ -109,14 +109,14 @@ cases = [
     ),
     (  # start == 0
         """\
-            __all__ = ['test']
+            __all__ = ["test"]
 
             def test():...
 
             def f():...
         """,
         """\
-            __all__ = ['f', 'test']
+            __all__ = ["f", "test"]
 
             def test():...
 
@@ -126,17 +126,17 @@ cases = [
     (
         """\
             __all__ = [
-                'x',
-                'y',
-                'z',
-                's',
+                "x",
+                "y",
+                "z",
+                "s",
             ]
 
             def x():...
 
         """,
         """\
-            __all__ = ['x']
+            __all__ = ["x"]
 
             def x():...
 
