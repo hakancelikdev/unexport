@@ -6,10 +6,10 @@ import re
 import tokenize
 from dataclasses import dataclass, field
 
-from pyall import constants as C
-from pyall import typing as T
-from pyall.relate import relate
-from pyall.rule import Rule
+from unexport import constants as C
+from unexport import typing as T
+from unexport.relate import relate
+from unexport.rule import Rule
 
 __all__ = ("Analyzer",)
 

@@ -6,17 +6,17 @@ To make an improvement, add a new feature or anything else, please open a issue 
 
 **Good first issues are the issues that you can quickly solve, we recommend you take a
 look.**
-[Good first issue](https://github.com/hakancelikdev/pyall/labels/good%20first%20issue)
+[Good first issue](https://github.com/hakancelikdev/unexport/labels/good%20first%20issue)
 
 ## Fork Repository
 
-[fork the pyall.](https://github.com/hakancelikdev/pyall/fork)
+[fork the unexport.](https://github.com/hakancelikdev/unexport/fork)
 
 ## Clone Repository
 
 ```shell
-$ git clone git@github.com:<USERNAME>/pyall.git
-$ cd pyall
+$ git clone git@github.com:<USERNAME>/unexport.git
+$ cd unexport
 ```
 
 ## Setup Branch
@@ -28,7 +28,7 @@ git checkout -b i{your issue number}
 ## How to Update My Local Repository
 
 ```shell
-$ git remote add upstream git@github.com:hakancelikdev/pyall.git
+$ git remote add upstream git@github.com:hakancelikdev/unexport.git
 $ git fetch upstream # or git fetch --all
 $ git rebase upstream/main
 ```
@@ -65,4 +65,4 @@ help us better understand the change you have made and also it is fun.
 
 ## License
 
-Pyall is GNU GENERAL PUBLIC licensed, as found in the LICENSE file.
+Unexport is GNU GENERAL PUBLIC licensed, as found in the LICENSE file.

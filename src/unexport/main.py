@@ -5,18 +5,18 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
-from pyall import __description__, __version__, color
-from pyall import constants as C
-from pyall import utils
-from pyall.config import Config
-from pyall.session import Session
+from unexport import __description__, __version__, color
+from unexport import constants as C
+from unexport import utils
+from unexport.config import Config
+from unexport.session import Session
 
 __all__ = ("main",)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        prog="Pyall",
+        prog="unexport",
         description=__description__,
     )
     parser.add_argument(
@@ -37,7 +37,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "-d",
         "--diff",
         action="store_true",
-        help="Prints a diff of all the changes Pyall would make to a file.",
+        help="Prints a diff of all the changes Unexport would make to a file.",
     )
     parser.add_argument(
         "--include",
@@ -59,8 +59,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         "-v",
         "--version",
         action="version",
-        version=f"Pyall {__version__}",
-        help="Prints version of pyall",
+        version=f"Unexport {__version__}",
+        help="Prints version of unexport",
     )
     argv = argv if argv is not None else sys.argv[1:]
     args = parser.parse_args(argv)

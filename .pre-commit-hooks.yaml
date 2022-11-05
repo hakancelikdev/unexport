@@ -1,9 +1,9 @@
-- id: pyall
-  name: pyall
+- id: unexport
+  name: unexport
   description:
-    "Pyall is a linter that tries to keep the __all __ in your Python modules always up
+    "unexport is a linter that tries to keep the __all __ in your Python modules always up
     to date."
-  entry: pyall
+  entry: unexport
   language: python
   language_version: python3
   types: [python]

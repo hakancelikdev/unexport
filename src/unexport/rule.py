@@ -5,13 +5,13 @@ import dataclasses
 import functools
 from typing import Callable, ClassVar, Iterator, NamedTuple, cast
 
-from pyall import typing as T
-from pyall.relate import first_occurrence
+from unexport import typing as T
+from unexport.relate import first_occurrence
 
 __all__ = ("Rule",)
 
 
-class InvalidRuleFunctionError(BaseException):  # pyall: not-public
+class InvalidRuleFunctionError(BaseException):  # unexport: not-public
     ...
 
 
