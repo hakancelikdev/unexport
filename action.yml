@@ -12,9 +12,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: pip install --upgrade pip && python -m pip install unexport==0.3.5
+    - run: pip install --upgrade pip && python -m pip install unexport==0.4.0
       shell: bash
-    - run: unexport  ${{ inputs.extra_args }}
+    - run: unexport ${{ inputs.extra_args }}
       shell: bash
 branding:
   icon: "check"
