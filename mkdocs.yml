@@ -1,7 +1,7 @@
 site_name: unexport
 site_description:
-  unexport is a linter that tries to keep the __all __ in your Python modules always up to
-  date.
+  unexport is a linter that tries to keep the __all __ in your Python modules always up
+  to date.
 site_url: https://unexport.hakancelik.dev
 
 markdown_extensions:

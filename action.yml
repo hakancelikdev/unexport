@@ -1,8 +1,8 @@
 # action.yml
 name: "py-all"
 description:
-  "Unexport is a linter that tries to keep the `__all__` in your Python modules always up
-  to date."
+  "Unexport is a linter that tries to keep the `__all__` in your Python modules always
+  up to date."
 
 inputs:
   extra_args:

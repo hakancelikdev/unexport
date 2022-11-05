@@ -1,7 +1,7 @@
 ## Get Started
 
-**Unexport is a linter that tries to keep the `__all__` in your Python modules always up to
-date.**
+**Unexport is a linter that tries to keep the `__all__` in your Python modules always up
+to date.**
 
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/hakancelikdev/unexport/main.svg)](https://results.pre-commit.ci/latest/github/hakancelikdev/unexport/main)
 [![test](https://github.com/hakancelikdev/unexport/actions/workflows/tests.yml/badge.svg)](https://github.com/hakancelikdev/unexport/actions/workflows/tests.yml)
@@ -19,7 +19,8 @@ date.**
 [![Contributors](https://img.shields.io/github/contributors/hakancelikdev/unexport)](https://github.com/hakancelikdev/unexport/graphs/contributors)
 [![Last Commit](https://img.shields.io/github/last-commit/hakancelikdev/unexport.svg)](https://github.com/hakancelikdev/unexport/commits/main)
 
-Try it out now using the Unexport Playground, https://playground-unexport.hakancelik.dev/
+Try it out now using the Unexport Playground,
+https://playground-unexport.hakancelik.dev/
 
 ## Installation
 
