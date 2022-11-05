@@ -1,8 +1,8 @@
-site_name: Pyall
+site_name: unexport
 site_description:
-  Pyall is a linter that tries to keep the __all __ in your Python modules always up to
-  date.
-site_url: https://pyall.hakancelik.dev
+  unexport is a linter that tries to keep the __all __ in your Python modules always up
+  to date.
+site_url: https://unexport.hakancelik.dev
 
 markdown_extensions:
   - fenced_code
@@ -79,7 +79,7 @@ extra:
     provider: google
     property: G-X2KBT06ZP2
 
-  homepage: https://pyall.hakancelik.dev
+  homepage: https://unexport.hakancelik.dev
 
 theme:
   name: material
@@ -119,9 +119,9 @@ theme:
     repo: fontawesome/brands/github
 
 copyright: Copyright &copy; 2020 - 2020 Hakan Celik
-repo_url: https://github.com/hakancelikdev/pyall
-repo_name: hakancelikdev/pyall
-edit_uri: https://github.com/hakancelikdev/pyall/tree/main/docs
+repo_url: https://github.com/hakancelikdev/unexport
+repo_name: hakancelikdev/unexport
+edit_uri: https://github.com/hakancelikdev/unexport/tree/main/docs
 
 nav:
   - Home: index.md

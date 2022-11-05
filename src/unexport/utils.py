@@ -6,7 +6,7 @@ import tokenize
 from pathlib import Path
 from typing import Iterable, Iterator
 
-from pyall import constants as C
+from unexport import constants as C
 
 __all__ = ("diff", "list_paths", "read")
 

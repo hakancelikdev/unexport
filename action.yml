@@ -1,20 +1,20 @@
 # action.yml
 name: "py-all"
 description:
-  "Pyall is a linter that tries to keep the `__all__` in your Python modules always up
-  to date."
+  "Unexport is a linter that tries to keep the `__all__` in your Python modules always
+  up to date."
 
 inputs:
   extra_args:
-    description: "options to pass to pyall run"
+    description: "options to pass to unexport run"
     required: false
     default: "--check"
 runs:
   using: "composite"
   steps:
-    - run: pip install --upgrade pip && python -m pip install pyall==0.3.5
+    - run: pip install --upgrade pip && python -m pip install unexport==0.3.5
       shell: bash
-    - run: pyall  ${{ inputs.extra_args }}
+    - run: unexport  ${{ inputs.extra_args }}
       shell: bash
 branding:
   icon: "check"

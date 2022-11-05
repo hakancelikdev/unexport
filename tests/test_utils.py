@@ -1,8 +1,8 @@
 import unittest
 from pathlib import Path
 
-from pyall import constants as C
-from pyall import utils
+from unexport import constants as C
+from unexport import utils
 
 __all__ = ["UtilsTestCase"]
 

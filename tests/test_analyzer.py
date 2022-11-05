@@ -2,7 +2,7 @@ import ast
 import textwrap
 import unittest
 
-from pyall.analyzer import Analyzer
+from unexport.analyzer import Analyzer
 
 __all__ = [
     "AnalyzerClassesTestCase",
@@ -39,7 +39,7 @@ class AnalyzerVariableTestCase(unittest.TestCase):
     def test_not_public_comment(self):
         source = textwrap.dedent(
             """\
-                TEST_VAR = 1 # pyall: not-public
+                TEST_VAR = 1 # unexport: not-public
             """
         )
         analyzer = Analyzer(source=source)
@@ -108,9 +108,9 @@ class AnalyzerTestCase(unittest.TestCase):
     def test_set_extra_attr(self):
         source = textwrap.dedent(
             """\
-                TEST_SKIP_VAR = 0 # pyall: not-public
+                TEST_SKIP_VAR = 0 # unexport: not-public
 
-                TEST_VAR = 1 # pyall: public
+                TEST_VAR = 1 # unexport: public
             """
         )
         analyzer = Analyzer(source=source)

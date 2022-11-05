@@ -7,7 +7,7 @@ from typing import Iterator
 
 import pytest
 
-from pyall.session import Session
+from unexport.session import Session
 
 __all__ = ["reopenable_temp_file", "test_refactor"]
 
@@ -158,24 +158,24 @@ cases = [
         """\
             __all__ = ["x"]
 
-            x = 1  # pyall: public
+            x = 1  # unexport: public
         """,
         """\
             __all__ = ["x"]
 
-            x = 1  # pyall: public
+            x = 1  # unexport: public
         """,
     ),
     (
         """\
             __all__ = []
 
-            XXX = 1  # pyall: not-public
+            XXX = 1  # unexport: not-public
         """,
         """\
             __all__ = []
 
-            XXX = 1  # pyall: not-public
+            XXX = 1  # unexport: not-public
         """,
     ),
 ]

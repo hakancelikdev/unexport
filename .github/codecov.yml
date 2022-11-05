@@ -8,6 +8,6 @@ comment: false
 
 ignore:
   - "setup.py"
-  - "pyall/__main__.py"
-  - "pyall/main.py"
+  - "unexport/__main__.py"
+  - "unexport/main.py"
   - "tests"

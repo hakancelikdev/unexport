@@ -4,10 +4,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterator
 
-from pyall import utils
-from pyall.analyzer import Analyzer
-from pyall.config import Config
-from pyall.refactor import refactor_source
+from unexport import utils
+from unexport.analyzer import Analyzer
+from unexport.config import Config
+from unexport.refactor import refactor_source
 
 __all__ = ("Session",)
 
