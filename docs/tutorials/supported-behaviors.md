@@ -8,7 +8,7 @@ __all__ = ["private_name"]
 private_name = ... # unexport: public
 ```
 
-## not-public
+## Remove public name from `__all__`
 
 Removes privates from `__all__`
 
