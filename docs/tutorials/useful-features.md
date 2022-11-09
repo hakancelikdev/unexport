@@ -6,7 +6,7 @@ comment.
 ````python
 __all__ = ["private_name", "_protected_name", "__private_name", "_protected_function", "__private_function", "_ProtectedClass", "__PrivateClass"]
 
-private_name = ... # unexport: public
+name = ... # unexport: public
 _protected_name = ...  # unexport: public
 __private_name = ...  # unexport: public
 
