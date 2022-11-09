@@ -3,7 +3,7 @@
 You can add the private name to `__all__`  When you write 'unexport: public' as a comment.
 
 ```python
-__all__ = ["public_variable"]
+__all__ = ["private_name"]
 
 private_name = ... # unexport: public
 ```
