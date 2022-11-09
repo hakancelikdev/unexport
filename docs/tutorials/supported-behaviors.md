@@ -5,7 +5,7 @@ You can add the private name to `__all__`  When you write 'unexport: public' as 
 ```python
 __all__ = ["public_variable"]
 
-public_variable = ... # unexport: public
+private_name = ... # unexport: public
 ```
 
 ## not-public
