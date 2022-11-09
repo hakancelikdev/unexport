@@ -1,6 +1,6 @@
 ## public
 
-Adds public variables to `__all__`
+You can add the private name to `__all__`  When you write 'unexport: public' as a comment.
 
 ```python
 __all__ = ["public_variable"]
