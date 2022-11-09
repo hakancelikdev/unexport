@@ -4,7 +4,7 @@ You can add the private name to `__all__` When you write 'unexport: public' as a
 comment.
 
 ````python
-__all__ = ["private_name", "_protected_name", "__private_name", "_protected_function", "__private_function", "_ProtectedClass", "__PrivateClass"]
+__all__ = ["name", "_protected_name", "__private_name", "_protected_function", "__private_function", "_ProtectedClass", "__PrivateClass"]
 
 name = ... # unexport: public
 _protected_name = ...  # unexport: public
