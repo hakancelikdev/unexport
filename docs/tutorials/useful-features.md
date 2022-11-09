@@ -3,7 +3,7 @@
 You can add the private name to `__all__` When you write 'unexport: public' as a
 comment.
 
-```python
+````python
 __all__ = ["private_name", "_protected_name", "__private_name", "_protected_function", "__private_function", "_ProtectedClass", "__PrivateClass"]
 
 private_name = ... # unexport: public
@@ -29,4 +29,4 @@ def public_function(): ...  # unexport: not-public
 
 class PublicClass:...  # unexport: not-public
 
-```
+````
