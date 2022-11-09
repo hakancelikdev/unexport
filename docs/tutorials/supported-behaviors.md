@@ -15,5 +15,4 @@ You can remove the public name from `__all__`  When you write 'unexport: not-pub
 ```python
 class Test:...  # unexport: not-public
 
-def _test():...  # unexport: not-public
 ```
