@@ -1,7 +1,6 @@
 ## Authors
 
 - Hakan Celik (@hakancelikdev) <hakancelikdev@gmail.com>
-- Osman Tamer (@osmantamer) <osmntamer@gmail.com>
 
 ## Contributors
 
