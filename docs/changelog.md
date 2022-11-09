@@ -12,6 +12,7 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - Change project name to `unexport` from `pyall`
+- User guides documented
 
 ## [0.3.5] - 2022-10-28
 
