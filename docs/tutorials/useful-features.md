@@ -22,6 +22,11 @@ You can remove the public name from `__all__` When you write 'unexport: not-publ
 comment.
 
 ```python
-class Test:...  # unexport: not-public
+
+PUBLIC_NAME = ...  # unexport: not-public
+
+def public_function(): ...  # unexport: not-public
+
+class PublicClass:...  # unexport: not-public
 
 ```
