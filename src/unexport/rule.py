@@ -135,12 +135,14 @@ def _rule_node_is_all_item(node) -> bool:
 def _rule_node_is_typevar(node) -> bool:
     modules: list[str] = []
     if isinstance(node.parent.value, ast.Call):
-        if 'TypeVar' == getattr(node.parent.value.func, 'id', None):
+        if "TypeVar" == getattr(node.parent.value.func, "id", None):
             modules.extend(body.module for body in node.parent.parent.body if isinstance(body, ast.ImportFrom))
-        elif 'typing' == getattr(node.parent.value.func.value, 'id', None) and 'TypeVar' == getattr(node.parent.value.func, 'attr', None):
+        elif "typing" == getattr(node.parent.value.func.value, "id", None) and "TypeVar" == getattr(
+            node.parent.value.func, "attr", None
+        ):
             for body in node.parent.parent.body:
                 if isinstance(body, ast.Import):
                     modules.extend([import_alias.name for import_alias in body.names])
-        if 'typing' in modules:
+        if "typing" in modules:
             return False
     return True
