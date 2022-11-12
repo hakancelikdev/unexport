@@ -129,3 +129,18 @@ def _rule_node_is_all_item(node) -> bool:
         and isinstance(node.value.func.value, ast.Name)
         and node.value.func.value.id == "__all__"
     )
+
+
+@Rule.register((ast.Name,))  # type: ignore
+def _rule_node_is_typevar(node) -> bool:
+    modules: list[str] = []
+    if isinstance(node.parent.value, ast.Call):
+        if 'TypeVar' == getattr(node.parent.value.func, 'id', None):
+            modules.extend(body.module for body in node.parent.parent.body if isinstance(body, ast.ImportFrom))
+        elif 'typing' == getattr(node.parent.value.func.value, 'id', None) and 'TypeVar' == getattr(node.parent.value.func, 'attr', None):
+            for body in node.parent.parent.body:
+                if isinstance(body, ast.Import):
+                    modules.extend([import_alias.name for import_alias in body.names])
+        if 'typing' in modules:
+            return False
+    return True

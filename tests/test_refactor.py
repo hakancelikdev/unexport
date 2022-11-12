@@ -178,6 +178,66 @@ cases = [
             XXX = 1  # unexport: not-public
         """,
     ),
+    (
+        """\
+            from typing import TypeVar
+
+            T = TypeVar("T")
+        """,
+        """\
+            from typing import TypeVar
+
+            T = TypeVar("T")
+        """,
+    ),
+    (
+        """\
+            from typing import TypeVar
+
+            T = TypeVar("T")
+
+            def func():
+                pass
+        """,
+        """\
+            from typing import TypeVar
+
+            __all__ = ["func"]
+
+            T = TypeVar("T")
+
+            def func():
+                pass
+        """,
+    ),
+    (
+        """\
+            import typing
+
+            T = typing.TypeVar("T")
+        """,
+        """\
+            import typing
+
+            T = typing.TypeVar("T")
+        """,
+    ),
+    (
+        """\
+            class TypeVar:
+                def __init__(self, name):...
+                
+            T = TypeVar("T")
+        """,
+        """\
+            __all__ = ["T", "TypeVar"]
+            
+            class TypeVar:
+                def __init__(self, name):...
+                
+            T = TypeVar("T")
+        """,
+    )
 ]
 
 
