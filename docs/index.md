@@ -4,7 +4,9 @@
 to date.**
 
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/hakancelikdev/unexport/main.svg)](https://results.pre-commit.ci/latest/github/hakancelikdev/unexport/main)
-[![test](https://github.com/hakancelikdev/unexport/actions/workflows/tests.yml/badge.svg)](https://github.com/hakancelikdev/unexport/actions/workflows/tests.yml)
+[![Test](https://github.com/hakancelikdev/unexport/actions/workflows/tests.yml/badge.svg)](https://github.com/hakancelikdev/unexport/actions/workflows/tests.yml)
+[![Build Docs](https://github.com/hakancelikdev/unexport/actions/workflows/docs.yml/badge.svg)](https://github.com/hakancelikdev/unexport/actions/workflows/docs.yml)
+[![Publish Package on Pypi](https://github.com/hakancelikdev/unexport/actions/workflows/pypi.yml/badge.svg)](https://github.com/hakancelikdev/unexport/actions/workflows/pypi.yml)
 
 [![Pypi](https://img.shields.io/pypi/v/unexport)](https://pypi.org/project/unexport/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/unexport)
