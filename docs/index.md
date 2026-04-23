@@ -22,7 +22,7 @@ to date.**
 [![Last Commit](https://img.shields.io/github/last-commit/hakancelikdev/unexport.svg)](https://github.com/hakancelikdev/unexport/commits/main)
 
 Try it out now using the Unexport Playground,
-https://unexport.hakancelik.dev/playground/
+https://playground-unexport.hakancelik.dev/
 
 ## Installation
 

@@ -15,12 +15,6 @@ repos:
       - id: unimport
         args: [--config=pyproject.toml]
 
-  - repo: https://github.com/PyCQA/docformatter
-    rev: v1.7.5
-    hooks:
-      - id: docformatter
-        args: [--config=pyproject.toml]
-
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.17.1
     hooks:
