@@ -25,7 +25,7 @@ target-version = ['py38', 'py39', 'py310']
 
 [tool.unimport]
 remove = true
-include_start_import = true
+include_star_import = true
 ignore_init = true
 
 [tool.docformatter]
