@@ -20,6 +20,3 @@ to date.**
 [![Last Commit](https://img.shields.io/github/last-commit/hakancelikdev/unexport.svg)](https://github.com/hakancelikdev/unexport/commits/main)
 
 For more information see: https://unexport.hakancelik.dev/
-
-Try it out now using the Unexport Playground,
-https://playground-unexport.hakancelik.dev/

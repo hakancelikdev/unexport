@@ -21,9 +21,6 @@ to date.**
 [![Contributors](https://img.shields.io/github/contributors/hakancelikdev/unexport)](https://github.com/hakancelikdev/unexport/graphs/contributors)
 [![Last Commit](https://img.shields.io/github/last-commit/hakancelikdev/unexport.svg)](https://github.com/hakancelikdev/unexport/commits/main)
 
-Try it out now using the Unexport Playground,
-https://playground-unexport.hakancelik.dev/
-
 ## Installation
 
 unexport requires Python 3.8+ and can be easily installed using most common Python
