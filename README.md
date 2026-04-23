@@ -22,4 +22,4 @@ to date.**
 For more information see: https://unexport.hakancelik.dev/
 
 Try it out now using the Unexport Playground,
-https://playground-unexport.hakancelik.dev/
+https://unexport.hakancelik.dev/playground/

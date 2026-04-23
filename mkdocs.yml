@@ -31,8 +31,8 @@ markdown_extensions:
   - pymdownx.keys
   - pymdownx.magiclink:
       repo_url_shorthand: true
-      user: squidfunk
-      repo: mkdocs-material
+      user: hakancelikdev
+      repo: unexport
   - pymdownx.mark
   - pymdownx.smartsymbols
   - pymdownx.superfences:
@@ -118,7 +118,7 @@ theme:
   icon:
     repo: fontawesome/brands/github
 
-copyright: Copyright &copy; 2020 - 2020 Hakan Celik
+copyright: Copyright &copy; 2020 - 2026 Hakan Çelik
 repo_url: https://github.com/hakancelikdev/unexport
 repo_name: hakancelikdev/unexport
 edit_uri: https://github.com/hakancelikdev/unexport/tree/main/docs
