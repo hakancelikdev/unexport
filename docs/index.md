@@ -116,3 +116,7 @@ repos:
       - id: unexport
         args: [--refactor]
 ```
+
+## References
+
+- [python-package](https://github.com/hakancelikdev/python-package)
