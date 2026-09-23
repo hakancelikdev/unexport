@@ -7,7 +7,13 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- Support Python3.12, including PEP 695 `type` statements and generic functions/classes
+
 ### Changed
+
+- Remove usage of `ast.Str`, which is deprecated since Python3.12
 
 - Useful features documented
 
