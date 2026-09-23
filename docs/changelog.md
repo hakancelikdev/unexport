@@ -12,10 +12,14 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Useful features documented
 - Refactoring replaces only the value of an existing `__all__`, so comments and other
   code on the same lines are kept
+- Refactoring keeps the type of an existing `__all__` (list, tuple or set) and writes
+  one name per line when `__all__` was already multi-line or would be longer than 88
+  characters
 
 ### Fixed
 
 - Comments after `__all__` were removed while refactoring
+- Crash on modules whose `__all__` is a set
 
 ## [0.4.0] - 2022-11-05
 
