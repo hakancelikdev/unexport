@@ -10,6 +10,12 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - Useful features documented
+- Refactoring replaces only the value of an existing `__all__`, so comments and other
+  code on the same lines are kept
+
+### Fixed
+
+- Comments after `__all__` were removed while refactoring
 
 ## [0.4.0] - 2022-11-05
 
