@@ -7,10 +7,14 @@ __all__ = (
     "GLOB_PATTERN",
     "INCLUDE_REGEX_PATTERN",
     "SKIP_COMMENTS_REGEX_PATTERN",
+    "TYPE_VAR_FACTORIES",
 )
 
 # TUPLE
 ALL_NODE = (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef, ast.Name)
+
+# FROZENSET
+TYPE_VAR_FACTORIES = frozenset({"TypeVar", "ParamSpec", "TypeVarTuple"})
 
 # REGEX
 INCLUDE_REGEX_PATTERN = r"\.(py)$"

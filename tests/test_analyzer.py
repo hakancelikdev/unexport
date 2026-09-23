@@ -47,6 +47,51 @@ class AnalyzerVariableTestCase(unittest.TestCase):
         self.assertFalse(analyzer.actual_all)
         self.assertFalse(analyzer.expected_all)
 
+    def test_type_var_is_not_public(self):
+        source = textwrap.dedent(
+            """\
+                import typing
+                from typing import ParamSpec, TypeVar, TypeVarTuple
+
+                T = TypeVar("T")
+                P = ParamSpec("P")
+                Ts = TypeVarTuple("Ts")
+                K = typing.TypeVar("K", bound=str)
+                V: typing.TypeVar = typing.TypeVar("V")
+
+                def func():
+                    pass
+            """
+        )
+        analyzer = Analyzer(source=source)
+        analyzer.traverse()
+        self.assertFalse(analyzer.actual_all)
+        self.assertListEqual(analyzer.expected_all, ["func"])
+
+    def test_type_var_public_comment(self):
+        source = textwrap.dedent(
+            """\
+                from typing import TypeVar
+
+                T = TypeVar("T")  # unexport: public
+            """
+        )
+        analyzer = Analyzer(source=source)
+        analyzer.traverse()
+        self.assertListEqual(analyzer.expected_all, ["T"])
+
+    def test_other_call_is_public(self):
+        source = textwrap.dedent(
+            """\
+                from typing import NewType
+
+                UserId = NewType("UserId", int)
+            """
+        )
+        analyzer = Analyzer(source=source)
+        analyzer.traverse()
+        self.assertListEqual(analyzer.expected_all, ["UserId"])
+
 
 class AnalyzerFunctionTestCase(unittest.TestCase):
     def test_primitive_function(self):
