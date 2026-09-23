@@ -9,6 +9,7 @@ __all__ = [
     "AnalyzerClassesTestCase",
     "AnalyzerFunctionTestCase",
     "AnalyzerPEP695TestCase",
+    "AnalyzerPEP696TestCase",
     "AnalyzerTestCase",
     "AnalyzerVariableTestCase",
 ]
@@ -183,3 +184,21 @@ class AnalyzerPEP695TestCase(unittest.TestCase):
         analyzer = Analyzer(source=source)
         analyzer.traverse()
         self.assertListEqual(analyzer.expected_all, ["Box", "first"])
+
+
+@unittest.skipIf(sys.version_info < (3, 13), "PEP 696 syntax requires Python 3.13+")
+class AnalyzerPEP696TestCase(unittest.TestCase):
+    def test_type_parameter_defaults(self):
+        source = textwrap.dedent(
+            """\
+                type Alias[T = int] = list[T]
+
+                def first[T = str](items: list[T]) -> T:
+                    return items[0]
+
+                class Box[*Ts = *tuple[int]]: ...
+            """
+        )
+        analyzer = Analyzer(source=source)
+        analyzer.traverse()
+        self.assertListEqual(analyzer.expected_all, ["Alias", "Box", "first"])
