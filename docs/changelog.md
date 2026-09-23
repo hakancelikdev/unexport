@@ -17,8 +17,9 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - Remove usage of `ast.Str`, which is deprecated since Python3.12
-
 - Useful features documented
+- Drop support for Python3.8 and Python3.9; Python3.10+ is now required
+- Development status is now Beta
 
 ## [0.4.0] - 2022-11-05
 
