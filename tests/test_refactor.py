@@ -178,6 +178,64 @@ cases = [
             XXX = 1  # unexport: not-public
         """,
     ),
+    (  # issue 7: keep the trailing comment
+        """\
+            __all__ = []  # comments
+
+            def a():...
+        """,
+        """\
+            __all__ = ["a"]  # comments
+
+            def a():...
+        """,
+    ),
+    (  # keep the comment after a multi-line __all__
+        """\
+            __all__ = [
+                "a",
+            ]  # public api
+
+            def a():...
+
+            def b():...
+        """,
+        """\
+            __all__ = ["a", "b"]  # public api
+
+            def a():...
+
+            def b():...
+        """,
+    ),
+    (  # only the value is replaced, other code on the same line is kept
+        """\
+            NAME = "ş"; __all__ = []; OTHER = 1
+        """,
+        """\
+            NAME = "ş"; __all__ = ["NAME", "OTHER"]; OTHER = 1
+        """,
+    ),
+    (  # the target and the spacing around "=" are kept
+        """\
+            import x
+
+            __all__=("a",)
+
+            def a():...
+
+            def b():...
+        """,
+        """\
+            import x
+
+            __all__=["a", "b"]
+
+            def a():...
+
+            def b():...
+        """,
+    ),
 ]
 
 
