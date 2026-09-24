@@ -10,6 +10,7 @@ __all__ = [
     "AnalyzerFunctionTestCase",
     "AnalyzerPEP695TestCase",
     "AnalyzerPEP696TestCase",
+    "AnalyzerPython314TestCase",
     "AnalyzerTestCase",
     "AnalyzerVariableTestCase",
 ]
@@ -202,3 +203,42 @@ class AnalyzerPEP696TestCase(unittest.TestCase):
         analyzer = Analyzer(source=source)
         analyzer.traverse()
         self.assertListEqual(analyzer.expected_all, ["Alias", "Box", "first"])
+
+
+@unittest.skipIf(sys.version_info < (3, 14), "Python 3.14+ syntax")
+class AnalyzerPython314TestCase(unittest.TestCase):
+    def test_template_string(self):
+        source = textwrap.dedent(
+            """\
+                NAME = "world"
+                GREETING = t"Hello {NAME}"
+            """
+        )
+        analyzer = Analyzer(source=source)
+        analyzer.traverse()
+        self.assertListEqual(analyzer.expected_all, ["GREETING", "NAME"])
+
+    def test_except_without_parentheses(self):
+        source = textwrap.dedent(
+            """\
+                try:
+                    VALUE = int("x")
+                except ValueError, TypeError:
+                    VALUE = 0
+            """
+        )
+        analyzer = Analyzer(source=source)
+        analyzer.traverse()
+        self.assertListEqual(analyzer.expected_all, ["VALUE"])
+
+    def test_deferred_annotations(self):
+        source = textwrap.dedent(
+            """\
+                def build() -> Later: ...
+
+                class Later: ...
+            """
+        )
+        analyzer = Analyzer(source=source)
+        analyzer.traverse()
+        self.assertListEqual(analyzer.expected_all, ["Later", "build"])
