@@ -41,8 +41,6 @@ class _AllItemAnalyzer(ast.NodeVisitor):
         for item in node.value.elts:
             if isinstance(item, ast.Constant):
                 self.actual_all.add(str(item.value))
-            elif isinstance(item, ast.Str):
-                self.actual_all.add(item.s)
 
     @Rule.apply
     def visit_Expr(self, node: ast.Expr) -> None:
@@ -52,16 +50,12 @@ class _AllItemAnalyzer(ast.NodeVisitor):
             for arg in node.value.args:
                 if isinstance(arg, ast.Constant):
                     self.actual_all.add(str(arg.value))
-                elif isinstance(arg, ast.Str):
-                    self.actual_all.add(arg.s)
         elif node.value.func.attr == "extend":
             for arg in node.value.args:
                 if isinstance(arg, ast.List):
                     for item in arg.elts:
                         if isinstance(item, ast.Constant):
                             self.actual_all.add(str(item.value))
-                        elif isinstance(item, ast.Str):
-                            self.actual_all.add(item.s)
 
 
 @dataclass
