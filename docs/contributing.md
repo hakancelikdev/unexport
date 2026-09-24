@@ -35,12 +35,13 @@ $ git rebase upstream/main
 
 ## Testing
 
-Firstly make sure you have 3.8, 3.9 and 3.10 python versions installed on your system.
+Firstly make sure you have the supported Python versions (3.10 to 3.14) installed on
+your system.
 
 After typing your codes, you should run the tests by typing the following command.
 
 ```shell
-$ python3.9 -m pip install tox
+$ python3 -m pip install tox
 $ tox
 ```
 

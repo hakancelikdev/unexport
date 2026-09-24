@@ -1,9 +1,9 @@
 import os
 import tempfile
 import textwrap
+from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterator
 
 import pytest
 
