@@ -6,6 +6,7 @@ import functools
 from collections.abc import Callable, Iterator
 from typing import ClassVar, NamedTuple, cast
 
+from unexport import constants as C
 from unexport import typing as T
 from unexport.relate import first_occurrence
 
@@ -115,6 +116,21 @@ def _rule_name_name(node) -> bool:
 @Rule.register((ast.Name,))  # type: ignore
 def _rule_name_ctx(node) -> bool:
     return isinstance(node.ctx, ast.Store)
+
+
+@Rule.register((ast.Name,))  # type: ignore
+def _rule_name_not_type_var(node) -> bool:
+    if hasattr(node, "add"):
+        return node.add is True
+    parent = node.parent
+    if not isinstance(parent, (ast.Assign, ast.AnnAssign)) or not isinstance(parent.value, ast.Call):
+        return True
+    func = parent.value.func
+    if isinstance(func, ast.Name):
+        return func.id not in C.TYPE_VAR_FACTORIES
+    if isinstance(func, ast.Attribute):
+        return func.attr not in C.TYPE_VAR_FACTORIES
+    return True
 
 
 @Rule.register((ast.Assign,))  # type: ignore

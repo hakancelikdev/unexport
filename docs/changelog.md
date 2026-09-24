@@ -20,6 +20,7 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Useful features documented
 - Drop support for Python3.8 and Python3.9; Python3.10+ is now required
 - Development status is now Beta
+- `TypeVar`, `ParamSpec` and `TypeVarTuple` definitions are no longer added to `__all__`
 
 ## [0.4.0] - 2022-11-05
 
