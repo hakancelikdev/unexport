@@ -3,8 +3,8 @@ from __future__ import annotations
 import difflib
 import re
 import tokenize
+from collections.abc import Iterable, Iterator
 from pathlib import Path
-from typing import Iterable, Iterator
 
 from unexport import constants as C
 

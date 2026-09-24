@@ -3,7 +3,7 @@
 You can add the private name to `__all__` When you write 'unexport: public' as a
 comment.
 
-````python
+```python
 __all__ = ["name", "_protected_name", "__private_name", "_protected_function", "__private_function", "_ProtectedClass", "__PrivateClass"]
 
 name = ... # unexport: public
@@ -15,6 +15,7 @@ def __private_function(): ...  # unexport: public
 
 class _ProtectedClass: ...  # unexport: public
 class __PrivateClass: ...  # unexport: public
+```
 
 ## Remove public name from `__all__`
 
@@ -27,5 +28,16 @@ PUBLIC_NAME = ...  # unexport: not-public
 def public_function(): ...  # unexport: not-public
 
 class PublicClass:...  # unexport: not-public
+```
 
-````
+## Type variables
+
+`TypeVar`, `ParamSpec` and `TypeVarTuple` definitions are module-local helpers, so they
+are not added to `__all__`. Write 'unexport: public' as a comment to add one anyway.
+
+```python
+from typing import TypeVar
+
+T = TypeVar("T")  # not added to __all__
+PublicT = TypeVar("PublicT")  # unexport: public
+```

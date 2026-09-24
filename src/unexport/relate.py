@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import ast
-from typing import Iterator
+from collections.abc import Iterator
 
 __all__ = ("first_occurrence", "get_parents", "relate")
 
