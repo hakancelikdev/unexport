@@ -37,7 +37,7 @@ class _AllItemAnalyzer(ast.NodeVisitor):
 
     @Rule.apply
     def visit_Assign(self, node: ast.Assign) -> None:
-        assert isinstance(node.value, (ast.List, ast.Tuple))
+        assert isinstance(node.value, (ast.List, ast.Tuple, ast.Set))
         for item in node.value.elts:
             if isinstance(item, ast.Constant):
                 self.actual_all.add(str(item.value))

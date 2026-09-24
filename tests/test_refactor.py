@@ -148,7 +148,9 @@ cases = [
 
         """,
         """\
-            __all__ = ["x"]
+            __all__ = [
+                "x",
+            ]
 
             def x():...
 
@@ -201,7 +203,10 @@ cases = [
             def b():...
         """,
         """\
-            __all__ = ["a", "b"]  # public api
+            __all__ = [
+                "a",
+                "b",
+            ]  # public api
 
             def a():...
 
@@ -229,11 +234,81 @@ cases = [
         """\
             import x
 
-            __all__=["a", "b"]
+            __all__=("a", "b")
 
             def a():...
 
             def b():...
+        """,
+    ),
+    (  # issue 22: keep a tuple
+        """\
+            __all__ = ("a", "b")
+
+            def c():...
+        """,
+        """\
+            __all__ = ("c",)
+
+            def c():...
+        """,
+    ),
+    (  # issue 22: keep a set
+        """\
+            __all__ = {"a"}
+
+            def b():...
+
+            def c():...
+        """,
+        """\
+            __all__ = {"b", "c"}
+
+            def b():...
+
+            def c():...
+        """,
+    ),
+    (  # issue 22: split a long __all__ into one name per line
+        """\
+            __all__ = []
+
+            def first_public_function_name():...
+            def second_public_function_name():...
+            def third_public_function_name():...
+        """,
+        """\
+            __all__ = [
+                "first_public_function_name",
+                "second_public_function_name",
+                "third_public_function_name",
+            ]
+
+            def first_public_function_name():...
+            def second_public_function_name():...
+            def third_public_function_name():...
+        """,
+    ),
+    (  # issue 22: split a long new __all__ into one name per line
+        """\
+            import x
+
+            def first_public_function_name():...
+            def second_public_function_name():...
+            def third_public_function_name():...
+        """,
+        """\
+            import x
+
+            __all__ = [
+                "first_public_function_name",
+                "second_public_function_name",
+                "third_public_function_name",
+            ]
+
+            def first_public_function_name():...
+            def second_public_function_name():...
+            def third_public_function_name():...
         """,
     ),
 ]
