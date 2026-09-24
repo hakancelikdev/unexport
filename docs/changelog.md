@@ -9,6 +9,7 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- Support Python3.13, including PEP 696 type parameter defaults
 - Support Python3.12, including PEP 695 `type` statements and generic functions/classes
 
 ### Changed
