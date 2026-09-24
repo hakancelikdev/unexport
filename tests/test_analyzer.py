@@ -1,4 +1,5 @@
 import ast
+import sys
 import textwrap
 import unittest
 
@@ -7,6 +8,9 @@ from unexport.analyzer import Analyzer
 __all__ = [
     "AnalyzerClassesTestCase",
     "AnalyzerFunctionTestCase",
+    "AnalyzerPEP695TestCase",
+    "AnalyzerPEP696TestCase",
+    "AnalyzerPython314TestCase",
     "AnalyzerTestCase",
     "AnalyzerVariableTestCase",
 ]
@@ -175,3 +179,111 @@ class AnalyzerTestCase(unittest.TestCase):
         self.assertFalse(nodes[6].skip)
         self.assertFalse(nodes[7].skip)
         self.assertFalse(nodes[8].skip)
+
+
+@unittest.skipIf(sys.version_info < (3, 12), "PEP 695 syntax requires Python 3.12+")
+class AnalyzerPEP695TestCase(unittest.TestCase):
+    def test_type_alias(self):
+        source = textwrap.dedent(
+            """\
+                type Point = tuple[float, float]
+                type _Private = int
+            """
+        )
+        analyzer = Analyzer(source=source)
+        analyzer.traverse()
+        self.assertFalse(analyzer.actual_all)
+        self.assertListEqual(analyzer.expected_all, ["Point"])
+
+    def test_type_alias_not_public_comment(self):
+        source = textwrap.dedent(
+            """\
+                type Point = tuple[float, float]  # unexport: not-public
+            """
+        )
+        analyzer = Analyzer(source=source)
+        analyzer.traverse()
+        self.assertFalse(analyzer.expected_all)
+
+    def test_generic_type_alias(self):
+        source = textwrap.dedent(
+            """\
+                type Pair[T] = tuple[T, T]
+            """
+        )
+        analyzer = Analyzer(source=source)
+        analyzer.traverse()
+        self.assertListEqual(analyzer.expected_all, ["Pair"])
+
+    def test_generic_function_and_class(self):
+        source = textwrap.dedent(
+            """\
+                def first[T](items: list[T]) -> T:
+                    return items[0]
+
+                class Box[T]:
+                    VALUE: T
+
+                    def get[K](self) -> K: ...
+            """
+        )
+        analyzer = Analyzer(source=source)
+        analyzer.traverse()
+        self.assertListEqual(analyzer.expected_all, ["Box", "first"])
+
+
+@unittest.skipIf(sys.version_info < (3, 13), "PEP 696 syntax requires Python 3.13+")
+class AnalyzerPEP696TestCase(unittest.TestCase):
+    def test_type_parameter_defaults(self):
+        source = textwrap.dedent(
+            """\
+                type Alias[T = int] = list[T]
+
+                def first[T = str](items: list[T]) -> T:
+                    return items[0]
+
+                class Box[*Ts = *tuple[int]]: ...
+            """
+        )
+        analyzer = Analyzer(source=source)
+        analyzer.traverse()
+        self.assertListEqual(analyzer.expected_all, ["Alias", "Box", "first"])
+
+
+@unittest.skipIf(sys.version_info < (3, 14), "Python 3.14+ syntax")
+class AnalyzerPython314TestCase(unittest.TestCase):
+    def test_template_string(self):
+        source = textwrap.dedent(
+            """\
+                NAME = "world"
+                GREETING = t"Hello {NAME}"
+            """
+        )
+        analyzer = Analyzer(source=source)
+        analyzer.traverse()
+        self.assertListEqual(analyzer.expected_all, ["GREETING", "NAME"])
+
+    def test_except_without_parentheses(self):
+        source = textwrap.dedent(
+            """\
+                try:
+                    VALUE = int("x")
+                except ValueError, TypeError:
+                    VALUE = 0
+            """
+        )
+        analyzer = Analyzer(source=source)
+        analyzer.traverse()
+        self.assertListEqual(analyzer.expected_all, ["VALUE"])
+
+    def test_deferred_annotations(self):
+        source = textwrap.dedent(
+            """\
+                def build() -> Later: ...
+
+                class Later: ...
+            """
+        )
+        analyzer = Analyzer(source=source)
+        analyzer.traverse()
+        self.assertListEqual(analyzer.expected_all, ["Later", "build"])

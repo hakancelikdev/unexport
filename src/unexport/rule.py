@@ -3,7 +3,8 @@ from __future__ import annotations
 import ast
 import dataclasses
 import functools
-from typing import Callable, ClassVar, Iterator, NamedTuple, cast
+from collections.abc import Callable, Iterator
+from typing import ClassVar, NamedTuple, cast
 
 from unexport import constants as C
 from unexport import typing as T
