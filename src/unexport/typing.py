@@ -7,5 +7,5 @@ __all__ = (
     "ASTFunctionT",
 )
 
-Function = TypeVar("Function", bound=Callable[..., Any])
+Function = TypeVar("Function", bound=Callable[..., Any])  # unexport: public
 ASTFunctionT = Union[ast.FunctionDef, ast.AsyncFunctionDef]
