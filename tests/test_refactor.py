@@ -495,6 +495,20 @@ cases = [
         "X = 1\nimport os",
         'X = 1\nimport os\n\n__all__ = ["X"]\n',
     ),
+    (  # an imported __all__ is left alone, not overridden by a new one
+        """\
+            from io import *
+            from io import __all__
+
+            class Extra: ...
+        """,
+        """\
+            from io import *
+            from io import __all__
+
+            class Extra: ...
+        """,
+    ),
 ]
 
 
