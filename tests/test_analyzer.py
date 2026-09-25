@@ -148,6 +148,22 @@ class AnalyzerClassesTestCase(unittest.TestCase):
 
 
 class AnalyzerTestCase(unittest.TestCase):
+    def test_name_defined_twice_is_listed_once(self):
+        source = textwrap.dedent(
+            """\
+                class Point: ...
+
+                Point = Point
+
+                def Factory(): ...
+
+                Factory = Factory
+            """
+        )
+        analyzer = Analyzer(source=source)
+        analyzer.traverse()
+        self.assertListEqual(analyzer.expected_all, ["Factory", "Point"])
+
     def test_emty(self):
         analyzer = Analyzer(source="")
         analyzer.traverse()
