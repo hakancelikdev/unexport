@@ -42,6 +42,8 @@ def _format_all(
 ) -> str:
     items = [f'"{name}"' for name in expected_all]
     opening, closing = brackets
+    if not items and opening == "{":
+        return "set()"  # {} is an empty dict
     if multiline:
         body = "".join(f"{indent}{_INDENT}{item},\n" for item in items)
         return f"{opening}\n{body}{indent}{closing}"
