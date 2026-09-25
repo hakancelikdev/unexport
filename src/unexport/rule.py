@@ -8,7 +8,7 @@ from typing import ClassVar, NamedTuple, cast
 
 from unexport import constants as C
 from unexport import typing as T
-from unexport.relate import first_occurrence, is_comprehension_target, is_runtime_missing
+from unexport.relate import first_occurrence, is_bare_annotation, is_comprehension_target, is_runtime_missing
 
 __all__ = ("Rule",)
 
@@ -118,14 +118,31 @@ def _rule_name_ctx(node) -> bool:
     return isinstance(node.ctx, ast.Store)
 
 
+def _assigned_value(node: ast.AST) -> ast.AST | None:
+    """The value a target name gets, following tuple unpacking (``T, U = TypeVar("T"), TypeVar("U")``)."""
+    path: list[int] = []
+    while isinstance(node.parent, (ast.Tuple, ast.List)):  # type: ignore[attr-defined]
+        path.append(node.parent.elts.index(node))  # type: ignore[attr-defined, arg-type]
+        node = node.parent  # type: ignore[attr-defined]
+    parent = node.parent  # type: ignore[attr-defined]
+    if not isinstance(parent, (ast.Assign, ast.AnnAssign)):
+        return None
+    value = parent.value
+    for index in reversed(path):
+        if not isinstance(value, (ast.Tuple, ast.List)) or len(value.elts) <= index:
+            return None
+        value = value.elts[index]
+    return value
+
+
 @Rule.register((ast.Name,))  # type: ignore
 def _rule_name_not_type_var(node) -> bool:
     if hasattr(node, "add"):
         return node.add is True
-    parent = node.parent
-    if not isinstance(parent, (ast.Assign, ast.AnnAssign)) or not isinstance(parent.value, ast.Call):
+    value = _assigned_value(node)
+    if not isinstance(value, ast.Call):
         return True
-    func = parent.value.func
+    func = value.func
     if isinstance(func, ast.Name):
         return func.id not in C.TYPE_VAR_FACTORIES
     if isinstance(func, ast.Attribute):
@@ -152,3 +169,10 @@ def _rule_name_not_comprehension_target(node) -> bool:
     if hasattr(node, "add"):
         return node.add is True
     return not is_comprehension_target(node)
+
+
+@Rule.register((ast.Name,))  # type: ignore
+def _rule_name_not_bare_annotation(node) -> bool:
+    if hasattr(node, "add"):
+        return node.add is True
+    return not is_bare_annotation(node)
