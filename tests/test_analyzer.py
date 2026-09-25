@@ -8,6 +8,7 @@ from unexport.analyzer import Analyzer
 __all__ = [
     "AnalyzerClassesTestCase",
     "AnalyzerFunctionTestCase",
+    "AnalyzerListedNamesTestCase",
     "AnalyzerPEP695TestCase",
     "AnalyzerPEP696TestCase",
     "AnalyzerPython314TestCase",
@@ -195,6 +196,81 @@ class AnalyzerTestCase(unittest.TestCase):
         self.assertFalse(nodes[6].skip)
         self.assertFalse(nodes[7].skip)
         self.assertFalse(nodes[8].skip)
+
+
+class AnalyzerListedNamesTestCase(unittest.TestCase):
+    """Names already listed in __all__ stay when the module still binds them (issue 39)."""
+
+    def expected_all(self, source: str) -> list[str]:
+        analyzer = Analyzer(source=textwrap.dedent(source))
+        analyzer.traverse()
+        return analyzer.expected_all
+
+    def test_reexported_imports_are_kept(self):
+        source = """\
+            import os.path
+            from .core import Api
+            from .models import User as Account
+
+            __all__ = ["Account", "Api", "helper", "os"]
+
+            def helper(): ...
+        """
+        self.assertListEqual(self.expected_all(source), ["Account", "Api", "helper", "os"])
+
+    def test_imports_are_not_added(self):
+        source = """\
+            from .core import Api
+
+            def helper(): ...
+        """
+        self.assertListEqual(self.expected_all(source), ["helper"])
+
+    def test_listed_lowercase_and_dunder_names_are_kept(self):
+        source = """\
+            __all__ = ["__version__", "logger", "_helper"]
+
+            __version__ = "1.0"
+            logger = object()
+
+            def _helper(): ...
+        """
+        self.assertListEqual(self.expected_all(source), ["__version__", "_helper", "logger"])
+
+    def test_listed_but_not_public_is_removed(self):
+        source = """\
+            __all__ = ["Hidden"]
+
+            Hidden = 1  # unexport: not-public
+        """
+        self.assertListEqual(self.expected_all(source), [])
+
+    def test_listed_but_undefined_is_removed(self):
+        source = """\
+            __all__ = ["gone", "func"]
+
+            def func(): ...
+        """
+        self.assertListEqual(self.expected_all(source), ["func"])
+
+    def test_star_import_keeps_unresolved_names(self):
+        source = """\
+            from .models import *
+
+            __all__ = ["User"]
+        """
+        self.assertListEqual(self.expected_all(source), ["User"])
+
+    def test_names_local_to_functions_or_comprehensions_are_not_bindings(self):
+        source = """\
+            __all__ = ["inner", "item"]
+
+            def func():
+                inner = 1
+
+            VALUES = [item for item in range(3)]
+        """
+        self.assertListEqual(self.expected_all(source), ["VALUES", "func"])
 
 
 @unittest.skipIf(sys.version_info < (3, 12), "PEP 695 syntax requires Python 3.12+")

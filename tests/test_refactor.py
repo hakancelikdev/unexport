@@ -311,6 +311,22 @@ cases = [
             def third_public_function_name():...
         """,
     ),
+    (  # issue 39: re-exported imports stay in __all__
+        """\
+            from .core import Api
+
+            __all__ = ["Api"]
+
+            def helper(): ...
+        """,
+        """\
+            from .core import Api
+
+            __all__ = ["Api", "helper"]
+
+            def helper(): ...
+        """,
+    ),
 ]
 
 
