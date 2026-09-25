@@ -5,6 +5,7 @@ import io
 import re
 import tokenize
 from dataclasses import dataclass, field
+from pathlib import Path
 
 from unexport import constants as C
 from unexport import typing as T
@@ -37,6 +38,24 @@ class _AllItemAnalyzer(ast.NodeVisitor):
         self.variables.add(node.id)
 
 
+_NAMESPACE_ACCESS = frozenset({"globals", "vars", "global_enum"})
+_MATCH_CAPTURES: tuple[type[ast.AST], ...] = (getattr(ast, "MatchAs"), getattr(ast, "MatchStar"))
+_MATCH_MAPPING: type[ast.AST] = getattr(ast, "MatchMapping")
+
+
+def _submodules(package_init: Path) -> set[str]:
+    """Modules and subpackages next to a package's ``__init__.py``."""
+    try:
+        entries = list(package_init.parent.iterdir())
+    except OSError:
+        return set()
+    return {
+        entry.stem if entry.suffix == ".py" else entry.name
+        for entry in entries
+        if (entry.suffix == ".py" and entry.name != "__init__.py") or (entry.is_dir() and entry.name.isidentifier())
+    }
+
+
 def _position(node: ast.AST) -> tuple[int, int]:
     return getattr(node, "lineno", 0), getattr(node, "col_offset", 0)
 
@@ -49,11 +68,21 @@ class _ModuleBindings:
     not_public: set[str] = field(default_factory=set)  # marked with ``# unexport: not-public``
     deleted: set[str] = field(default_factory=set)  # removed with ``del`` after their last binding
     has_star_import: bool = False
+    # Names can also appear without a visible binding: module ``__getattr__`` (PEP 562), ``globals()`` / ``vars()``
+    # updates or ``@enum.global_enum``.
+    has_dynamic_namespace: bool = False
+    submodules: set[str] = field(default_factory=set)  # of a package's __init__.py; ``from pkg import *`` imports them
     # (line, column) of the last binding / ``del`` of each name, so ``X = 1; del X`` on one line is ordered too.
     _last_bound: dict[str, tuple[int, int]] = field(default_factory=dict, repr=False)
     _last_deleted: dict[str, tuple[int, int]] = field(default_factory=dict, repr=False)
 
     def collect(self, tree: ast.Module) -> None:
+        # Anywhere in the module, since functions can change the module namespace too.
+        self.has_dynamic_namespace = any(
+            (isinstance(node, ast.Name) and node.id in _NAMESPACE_ACCESS)
+            or (isinstance(node, ast.Attribute) and node.attr == "global_enum")
+            for node in ast.walk(tree)
+        )
         nodes: list[ast.AST] = list(tree.body)
         while nodes:
             node = nodes.pop()
@@ -62,6 +91,8 @@ class _ModuleBindings:
             if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Del):
                 self._last_deleted[node.id] = max(_position(node), self._last_deleted.get(node.id, (0, 0)))
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                if node.name == "__getattr__" and not isinstance(node, ast.ClassDef):
+                    self.has_dynamic_namespace = True
                 self._bind(node.name, node)
                 nodes.extend(node.decorator_list)  # the body is a nested scope
                 continue
@@ -81,6 +112,10 @@ class _ModuleBindings:
                         self._bind(alias.asname or alias.name, alias)
             elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store) and not is_bare_annotation(node):
                 self._bind(node.id, node)
+            elif isinstance(node, _MATCH_CAPTURES) and node.name:  # type: ignore[attr-defined]
+                self._bind(node.name, node)  # type: ignore[attr-defined]
+            elif isinstance(node, _MATCH_MAPPING) and node.rest:  # type: ignore[attr-defined]
+                self._bind(node.rest, node)  # type: ignore[attr-defined]
             nodes.extend(ast.iter_child_nodes(node))
 
         # `del NAME` after the last binding: the name doesn't exist once the module is imported.
@@ -100,16 +135,18 @@ class _ModuleBindings:
 
         It does when the module binds it (a re-exported import, a dunder
         or a lowercase variable that unexport would not add on its own),
-        or when a star import might provide it.
+        when it is a submodule of the package, or when a star import,
+        ``__getattr__`` or a ``globals()`` update might provide it.
         """
         if name in self.not_public:
             return False
-        return name in self.names or self.has_star_import
+        return name in self.names or name in self.submodules or self.has_star_import or self.has_dynamic_namespace
 
 
 @dataclass
 class Analyzer:
     source: str
+    path: Path | None = None
     all_item_analyzer: _AllItemAnalyzer = field(init=False, default_factory=_AllItemAnalyzer)
     module_bindings: _ModuleBindings = field(init=False, default_factory=_ModuleBindings)
     all_statements: list[AllStatement] = field(init=False, default_factory=list)
@@ -122,6 +159,8 @@ class Analyzer:
         relate(tree)
         self.set_extra_attr(tree)
         self.all_item_analyzer.visit(tree)
+        if self.path is not None and self.path.name == "__init__.py":
+            self.module_bindings.submodules = _submodules(self.path)
         self.module_bindings.collect(tree)
         self.all_statements = find_all_statements(tree)
         self.all_item_analyzer.actual_all = {name for statement in self.all_statements for name in statement.names}

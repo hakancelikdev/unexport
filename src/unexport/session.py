@@ -27,8 +27,8 @@ class Session:
                 yield source, py_path, None
 
     @staticmethod
-    def get_expected_all(source: str) -> tuple[bool, list[str]]:
-        analyzer = Analyzer(source=source)
+    def get_expected_all(source: str, path: Path | None = None) -> tuple[bool, list[str]]:
+        analyzer = Analyzer(source=source, path=path)
         analyzer.traverse()
         # A dynamic __all__ (e.g. ``["a"] + sub.__all__``) can't be compared statically; leave it alone.
         match = analyzer.is_dynamic_all or analyzer.actual_all == analyzer.expected_all
@@ -37,7 +37,7 @@ class Session:
     @classmethod
     def refactor(cls, path: Path, apply: bool = False) -> str:
         source, encoding, newline = utils.read(path)
-        _, expected_all = cls.get_expected_all(source)
+        _, expected_all = cls.get_expected_all(source, path)
         new_source = refactor_source(source, expected_all)
         if apply and new_source != source:
             with path.open("w", encoding=encoding, newline=newline) as file:
