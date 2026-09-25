@@ -327,6 +327,36 @@ cases = [
             def helper(): ...
         """,
     ),
+    (  # issue 45: a stale __all__ becomes empty
+        """\
+            __all__ = ["gone"]
+
+            _private = 1
+        """,
+        """\
+            __all__ = []
+
+            _private = 1
+        """,
+    ),
+    (  # issue 45: keep the tuple form, even when it was multi-line
+        """\
+            __all__ = (
+                "gone",
+            )
+        """,
+        """\
+            __all__ = ()
+        """,
+    ),
+    (  # no __all__ and nothing public: unchanged
+        """\
+            _private = 1
+        """,
+        """\
+            _private = 1
+        """,
+    ),
 ]
 
 
