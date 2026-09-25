@@ -475,6 +475,18 @@ cases = [
             def other(): ...
         """,
     ),
+    (  # an empty set __all__ stays a set
+        """\
+            __all__ = {"removed"}
+
+            def _private(): ...
+        """,
+        """\
+            __all__ = set()
+
+            def _private(): ...
+        """,
+    ),
 ]
 
 
