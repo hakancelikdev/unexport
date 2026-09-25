@@ -86,11 +86,14 @@ def refactor_source(source: str, expected_all: list[str]) -> str:
     refactored_all = f"__all__ = {_format_all(expected_all)}"
     if len(refactored_all) > _MAX_LINE_LENGTH:
         refactored_all = f"__all__ = {_format_all(expected_all, multiline=True)}"
+    if lines and lines[-1] == "":
+        lines.pop()  # _splitlines_no_ff ends with "" after a trailing newline
+    if start == len(lines) and lines and not lines[-1].endswith("\n"):
+        lines[-1] += "\n"  # the last import has no trailing newline
     lines.insert(start, refactored_all + "\n")
 
-    next_line = lines[start + 1]
     previous_line = lines[start - 1]
-    if next_line != "\n":
+    if start + 1 < len(lines) and lines[start + 1] != "\n":
         lines.insert(start + 1, "\n")
     if start != 0 and previous_line != "\n":
         lines.insert(start, "\n")

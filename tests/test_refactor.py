@@ -487,6 +487,14 @@ cases = [
             def _private(): ...
         """,
     ),
+    (  # the last top-level statement is an import
+        "X = 1\nimport os\n",
+        'X = 1\nimport os\n\n__all__ = ["X"]\n',
+    ),
+    (  # ... without a trailing newline
+        "X = 1\nimport os",
+        'X = 1\nimport os\n\n__all__ = ["X"]\n',
+    ),
 ]
 
 

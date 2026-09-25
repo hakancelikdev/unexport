@@ -65,6 +65,8 @@ class AnalyzerVariableTestCase(unittest.TestCase):
                 Ts = TypeVarTuple("Ts")
                 K = typing.TypeVar("K", bound=str)
                 V: typing.TypeVar = typing.TypeVar("V")
+                A, (B, [C]) = TypeVar("A"), (TypeVar("B"), [TypeVar("C")])
+                Pair, Name = TypeVar("Pair"), "a string"
 
                 def func():
                     pass
@@ -73,7 +75,7 @@ class AnalyzerVariableTestCase(unittest.TestCase):
         analyzer = Analyzer(source=source)
         analyzer.traverse()
         self.assertFalse(analyzer.actual_all)
-        self.assertListEqual(analyzer.expected_all, ["func"])
+        self.assertListEqual(analyzer.expected_all, ["Name", "func"])
 
     def test_type_var_public_comment(self):
         source = textwrap.dedent(
@@ -335,6 +337,17 @@ class AnalyzerRuntimeNamesTestCase(unittest.TestCase):
             KEPT = 1
         """
         self.assertListEqual(self.expected_all(source), ["KEPT"])
+
+    def test_bare_annotation(self):
+        source = """\
+            __all__ = ["Declared", "Assigned"]
+
+            Declared: int
+            Assigned: int = 1
+            Later: str
+            Later = "set later"
+        """
+        self.assertListEqual(self.expected_all(source), ["Assigned", "Later"])
 
     def test_rebound_after_del(self):
         source = """\
