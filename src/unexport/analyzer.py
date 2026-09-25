@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from unexport import constants as C
 from unexport import typing as T
 from unexport.dunder_all import AllStatement, find_all_statements
-from unexport.relate import is_runtime_missing, relate
+from unexport.relate import is_bare_annotation, is_runtime_missing, relate
 from unexport.rule import Rule
 
 __all__ = ("Analyzer",)
@@ -74,7 +74,7 @@ class _ModuleBindings:
                         self.has_star_import = True
                     else:
                         self._bind(alias.asname or alias.name, node)
-            elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+            elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store) and not is_bare_annotation(node):
                 self._bind(node.id, node)
             nodes.extend(ast.iter_child_nodes(node))
 

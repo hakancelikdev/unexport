@@ -3,7 +3,14 @@ from __future__ import annotations
 import ast
 from collections.abc import Iterator
 
-__all__ = ("first_occurrence", "get_parents", "is_comprehension_target", "is_runtime_missing", "relate")
+__all__ = (
+    "first_occurrence",
+    "get_parents",
+    "is_bare_annotation",
+    "is_comprehension_target",
+    "is_runtime_missing",
+    "relate",
+)
 
 
 def relate(tree: ast.AST, parent: ast.AST | None = None) -> None:
@@ -73,3 +80,9 @@ def is_comprehension_target(node: ast.AST) -> bool:
             return False
         child = parent
     return False
+
+
+def is_bare_annotation(node: ast.AST) -> bool:
+    """Whether node is the target of an annotation without a value (``X: int``), which binds nothing at runtime."""
+    parent = getattr(node, "parent", None)
+    return isinstance(parent, ast.AnnAssign) and parent.target is node and parent.value is None
