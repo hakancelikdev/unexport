@@ -38,6 +38,9 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - A stale `__all__` is rewritten to be empty when nothing is public anymore, and
   "Refactoring" is only printed when the file changed
   [#45](https://github.com/hakancelikdev/unexport/issues/45)
+- A new `__all__` is inserted after the module docstring (and after a leading shebang or
+  encoding line) instead of above it
+  [#42](https://github.com/hakancelikdev/unexport/issues/42)
 - Crash on modules whose `__all__` is a set
 
 ## [0.4.0] - 2022-11-05
