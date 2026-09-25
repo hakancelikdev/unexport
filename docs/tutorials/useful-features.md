@@ -48,7 +48,8 @@ Names that are already in `__all__` stay there as long as the module still binds
 even if unexport would not add them on its own: re-exported imports, dunders such as
 `__version__`, lowercase variables or private helpers. If the module has a star import,
 listed names that may come from it are kept as well. A listed name that no longer
-exists, or that is marked `# unexport: not-public`, is removed.
+exists, or that is marked `# unexport: not-public` (also on an import, or on one name of
+a multi-line import), is removed.
 
 ```python
 from .core import Api

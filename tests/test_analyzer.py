@@ -292,6 +292,19 @@ class AnalyzerListedNamesTestCase(unittest.TestCase):
         """
         self.assertListEqual(self.expected_all(source), [])
 
+    def test_listed_but_not_public_import_is_removed(self):
+        source = """\
+            import os  # unexport: not-public
+            from .core import Api, Hidden  # unexport: not-public
+            from .models import (
+                User,
+                Group,  # unexport: not-public
+            )
+
+            __all__ = ["Api", "Group", "Hidden", "User", "os"]
+        """
+        self.assertListEqual(self.expected_all(source), ["User"])
+
     def test_listed_but_undefined_is_removed(self):
         source = """\
             __all__ = ["gone", "func"]
