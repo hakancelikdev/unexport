@@ -65,6 +65,8 @@ class AnalyzerVariableTestCase(unittest.TestCase):
                 Ts = TypeVarTuple("Ts")
                 K = typing.TypeVar("K", bound=str)
                 V: typing.TypeVar = typing.TypeVar("V")
+                A, (B, [C]) = TypeVar("A"), (TypeVar("B"), [TypeVar("C")])
+                Pair, Name = TypeVar("Pair"), "a string"
 
                 def func():
                     pass
@@ -73,7 +75,7 @@ class AnalyzerVariableTestCase(unittest.TestCase):
         analyzer = Analyzer(source=source)
         analyzer.traverse()
         self.assertFalse(analyzer.actual_all)
-        self.assertListEqual(analyzer.expected_all, ["func"])
+        self.assertListEqual(analyzer.expected_all, ["Name", "func"])
 
     def test_type_var_public_comment(self):
         source = textwrap.dedent(
