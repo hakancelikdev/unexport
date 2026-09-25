@@ -68,16 +68,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     session = Session(config=config)
     exit_code = 0
     for path in args.sources:
-        for source, py_path in session.get_source(path):
-            try:
-                match, expected_all = session.get_expected_all(source)
-                if match:
-                    continue
-            except SyntaxError as e:
-                color.paint(str(e) + "at " + py_path.as_posix(), color.RED)
-                continue
-            else:
+        for source, py_path, error in session.get_source(path):
+            if source is not None:
+                try:
+                    match, expected_all = session.get_expected_all(source)
+                except SyntaxError as exc:
+                    error = str(exc)
+            if error is not None:
+                print(color.paint(f"{error} at {py_path.as_posix()}", color.RED))
                 exit_code = 1
+                continue
+            if match:
+                continue
+            exit_code = 1
             if args.refactor and session.refactor(path=py_path, apply=True) != source:
                 print(f"Refactoring '{color.paint(str(py_path), color.GREEN)}'")
             if args.diff:

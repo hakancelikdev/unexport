@@ -8,16 +8,17 @@ from pathlib import Path
 
 from unexport import constants as C
 
-__all__ = ("diff", "list_paths", "read")
+__all__ = ("READ_ERRORS", "diff", "list_paths", "read")
+
+
+# Raised by read(): the file can't be opened, has an invalid encoding declaration or can't be decoded.
+READ_ERRORS = (OSError, SyntaxError, UnicodeDecodeError)
 
 
 def read(path: Path) -> tuple[str, str]:
-    try:
-        with tokenize.open(path) as stream:
-            source = stream.read()
-            encoding = stream.encoding
-    except (OSError, SyntaxError):
-        return "", "utf-8"
+    with tokenize.open(path) as stream:
+        source = stream.read()
+        encoding = stream.encoding
     return source, encoding
 
 
