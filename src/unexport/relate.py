@@ -51,21 +51,36 @@ def _is_main_guard(test: ast.expr) -> bool:
     )
 
 
-def is_runtime_missing(node: ast.AST) -> bool:
-    """Whether node is in the body of ``if TYPE_CHECKING:`` or ``if __name__ == "__main__":``.
+def _truth_on_import(test: ast.expr) -> bool | None:
+    """Static value of an ``if`` test when the module is imported, or None when it can't be known.
 
-    Names defined there don't exist when the module is imported, so
-    exporting them breaks ``from module import *``. The ``else`` branch
-    does run.
+    ``TYPE_CHECKING`` and ``__name__ == "__main__"`` are false then, and
+    constants such as ``if False:`` / ``if 0:`` have a fixed value.
+    """
+    if _is_type_checking(test) or _is_main_guard(test):
+        return False
+    if isinstance(test, ast.Constant):
+        return bool(test.value)
+    if isinstance(test, ast.UnaryOp) and isinstance(test.op, ast.Not):
+        value = _truth_on_import(test.operand)
+        return None if value is None else not value
+    return None
+
+
+def is_runtime_missing(node: ast.AST) -> bool:
+    """Whether node is in a branch that doesn't run when the module is imported.
+
+    That is the body of ``if TYPE_CHECKING:``, ``if __name__ == "__main__":``
+    or ``if False:``, or the ``else`` of ``if not TYPE_CHECKING:`` / ``if True:``.
+    Names defined there don't exist at import time, so exporting them breaks
+    ``from module import *``.
     """
     child = node
     for parent in get_parents(node):
-        if (
-            isinstance(parent, ast.If)
-            and child in parent.body
-            and (_is_type_checking(parent.test) or _is_main_guard(parent.test))
-        ):
-            return True
+        if isinstance(parent, ast.If):
+            truth = _truth_on_import(parent.test)
+            if (truth is False and child in parent.body) or (truth is True and child in parent.orelse):
+                return True
         child = parent
     return False
 
