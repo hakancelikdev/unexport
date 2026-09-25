@@ -210,6 +210,16 @@ class AnalyzerAllFormsTestCase(unittest.TestCase):
         analyzer.traverse()
         return analyzer
 
+    def test_imported_or_unpacked_all_is_dynamic(self):
+        for source in (
+            "from io import __all__\nclass Extra: ...\n",
+            "from io import (__all__, SEEK_SET)\nclass Extra: ...\n",
+            "import names as __all__\nclass Extra: ...\n",
+            "__all__, VERSION = ['Extra'], 1\nclass Extra: ...\nclass Other: ...\n",
+        ):
+            with self.subTest(source=source):
+                self.assertTrue(self.analyze(source).is_dynamic_all)
+
     def test_augmented_annotated_and_extend_tuple(self):
         analyzer = self.analyze(
             """\
