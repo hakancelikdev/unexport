@@ -54,6 +54,8 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   reported but not rewritten, and a dynamic `__all__` (e.g. `["a"] + sub.__all__`) is
   left alone [#41](https://github.com/hakancelikdev/unexport/issues/41)
 - Crash on modules whose `__all__` is a set
+- An `__all__` with comments inside the literal is reported but not rewritten, so the
+  comments are not lost; `# unexport:` markers inside string literals are ignored
 
 ## [0.4.0] - 2022-11-05
 

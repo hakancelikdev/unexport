@@ -342,6 +342,13 @@ class AnalyzerListedNamesTestCase(unittest.TestCase):
             analyzer.traverse()
             self.assertListEqual(analyzer.expected_all, ["Thing", "sub", "subpackage"])
 
+    def test_marker_inside_a_string_is_not_a_comment(self):
+        source = """\
+            Message = "# unexport: not-public"
+            Other = 1
+        """
+        self.assertListEqual(self.expected_all(source), ["Message", "Other"])
+
     def test_listed_but_undefined_is_removed(self):
         source = """\
             __all__ = ["gone", "func"]

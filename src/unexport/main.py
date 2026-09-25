@@ -86,7 +86,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 if new_source == source:
                     print(
                         color.paint(py_path.as_posix(), color.YELLOW)
-                        + ": __all__ is built from several statements and can't be updated automatically; expected "
+                        + ": __all__ can't be updated automatically (it is built from several statements, is not a"
+                        + " plain list, tuple or set, or has comments inside); expected "
                         + color.paint("__all__ = " + str(expected_all), color.GREEN)
                     )
                     continue
