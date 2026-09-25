@@ -41,6 +41,9 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - A new `__all__` is inserted after the module docstring (and after a leading shebang or
   encoding line) instead of above it
   [#42](https://github.com/hakancelikdev/unexport/issues/42)
+- Syntax errors and files that can't be read or decoded are reported with their path and
+  make the exit code 1, instead of being skipped silently or crashing the run
+  [#44](https://github.com/hakancelikdev/unexport/issues/44)
 - Crash on modules whose `__all__` is a set
 
 ## [0.4.0] - 2022-11-05

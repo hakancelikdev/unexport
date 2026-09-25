@@ -16,10 +16,15 @@ __all__ = ("Session",)
 class Session:
     config: Config
 
-    def get_source(self, path: Path) -> Iterator[tuple[str, Path]]:
+    def get_source(self, path: Path) -> Iterator[tuple[str | None, Path, str | None]]:
+        """Yield (source, path, error) for each file; source is None when the file can't be read."""
         for py_path in utils.list_paths(path, include=self.config.include, exclude=self.config.exclude):
-            source, _ = utils.read(py_path)
-            yield source, py_path
+            try:
+                source, _ = utils.read(py_path)
+            except utils.READ_ERRORS as exc:
+                yield None, py_path, str(exc)
+            else:
+                yield source, py_path, None
 
     @staticmethod
     def get_expected_all(source: str) -> tuple[bool, list[str]]:
