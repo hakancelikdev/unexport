@@ -20,7 +20,7 @@ class Session:
         """Yield (source, path, error) for each file; source is None when the file can't be read."""
         for py_path in utils.list_paths(path, include=self.config.include, exclude=self.config.exclude):
             try:
-                source, _ = utils.read(py_path)
+                source, _, _ = utils.read(py_path)
             except utils.READ_ERRORS as exc:
                 yield None, py_path, str(exc)
             else:
@@ -36,9 +36,10 @@ class Session:
 
     @classmethod
     def refactor(cls, path: Path, apply: bool = False) -> str:
-        source, encoding = utils.read(path)
+        source, encoding, newline = utils.read(path)
         _, expected_all = cls.get_expected_all(source)
         new_source = refactor_source(source, expected_all)
         if apply and new_source != source:
-            path.write_text(new_source, encoding=encoding)
+            with path.open("w", encoding=encoding, newline=newline) as file:
+                file.write(new_source)
         return new_source
