@@ -8,6 +8,7 @@ from unexport.analyzer import Analyzer
 __all__ = [
     "AnalyzerClassesTestCase",
     "AnalyzerFunctionTestCase",
+    "AnalyzerAllFormsTestCase",
     "AnalyzerListedNamesTestCase",
     "AnalyzerRuntimeNamesTestCase",
     "AnalyzerPEP695TestCase",
@@ -197,6 +198,51 @@ class AnalyzerTestCase(unittest.TestCase):
         self.assertFalse(nodes[6].skip)
         self.assertFalse(nodes[7].skip)
         self.assertFalse(nodes[8].skip)
+
+
+class AnalyzerAllFormsTestCase(unittest.TestCase):
+    """How __all__ is read (issue 41)."""
+
+    def analyze(self, source: str) -> Analyzer:
+        analyzer = Analyzer(source=textwrap.dedent(source))
+        analyzer.traverse()
+        return analyzer
+
+    def test_augmented_annotated_and_extend_tuple(self):
+        analyzer = self.analyze(
+            """\
+                __all__: list[str] = ["a"]
+                __all__ += ["b"]
+                __all__.extend(("c",))
+                __all__.append("d")
+
+                def a(): ...
+                def b(): ...
+                def c(): ...
+                def d(): ...
+            """
+        )
+        self.assertListEqual(analyzer.actual_all, ["a", "b", "c", "d"])
+        self.assertListEqual(analyzer.actual_all, analyzer.expected_all)
+        self.assertFalse(analyzer.is_dynamic_all)
+
+    def test_dynamic_parts(self):
+        for source in (
+            '__all__ = ["a"] + sub.__all__\n',
+            '__all__ = ["a"]\n__all__.extend(sub.__all__)\n',
+            '__all__ = ["a", "b"]\n__all__.remove("b")\n',
+        ):
+            with self.subTest(source=source):
+                self.assertTrue(self.analyze(source).is_dynamic_all)
+
+    def test_all_inside_a_function_is_ignored(self):
+        analyzer = self.analyze(
+            """\
+                def setup():
+                    __all__ = ["nothing"]
+            """
+        )
+        self.assertListEqual(analyzer.actual_all, [])
 
 
 class AnalyzerListedNamesTestCase(unittest.TestCase):

@@ -48,6 +48,10 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   names deleted with `del`, defined only under `if TYPE_CHECKING:` or
   `if __name__ == "__main__":`, and comprehension variables
   [#40](https://github.com/hakancelikdev/unexport/issues/40)
+- `__all__ +=`, annotated `__all__`, `extend` with a tuple and `__all__` inside
+  functions are handled correctly; an `__all__` built from several statements is
+  reported but not rewritten, and a dynamic `__all__` (e.g. `["a"] + sub.__all__`) is
+  left alone [#41](https://github.com/hakancelikdev/unexport/issues/41)
 - Crash on modules whose `__all__` is a set
 
 ## [0.4.0] - 2022-11-05

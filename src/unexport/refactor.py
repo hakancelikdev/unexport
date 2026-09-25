@@ -3,19 +3,14 @@ from __future__ import annotations
 import ast
 import re
 
+from unexport.dunder_all import find_all_statements
+
 __all__ = ("refactor_source",)
 
 _MAX_LINE_LENGTH = 88
 _CODING_COMMENT = re.compile(r"^[ \t\f]*#.*?coding[:=][ \t]*[-\w.]+")  # PEP 263
 _INDENT = " " * 4
 _BRACKETS = {ast.List: ("[", "]"), ast.Tuple: ("(", ")"), ast.Set: ("{", "}")}
-
-
-def _find_all_node(tree: ast.Module) -> ast.Assign | None:
-    for node in tree.body:
-        if isinstance(node, ast.Assign) and getattr(node.targets[0], "id", None) == "__all__":
-            return node
-    return None
 
 
 def _find_insert_line(tree: ast.Module, lines: list[str]) -> int:
@@ -71,9 +66,15 @@ def refactor_source(source: str, expected_all: list[str]) -> str:
     tree = ast.parse(source)
     lines = ast._splitlines_no_ff(source)  # type: ignore
 
-    if all_node := _find_all_node(tree):
+    if statements := find_all_statements(tree):
+        node = statements[0].node
+        if len(statements) > 1 or not isinstance(node, (ast.Assign, ast.AnnAssign)):
+            # Built from several statements (+=, append, extend, ...): rewriting one of them would list names twice.
+            return source
+        if not isinstance(node.value, (ast.List, ast.Tuple, ast.Set)):
+            return source  # e.g. ["a"] + sub.__all__
         # Also when nothing is public anymore: a stale __all__ becomes empty.
-        _replace_value(lines, all_node.value, expected_all)
+        _replace_value(lines, node.value, expected_all)
         return "".join(lines)
 
     if not expected_all:

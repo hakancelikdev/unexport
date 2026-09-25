@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 
 from unexport import constants as C
 from unexport import typing as T
+from unexport.dunder_all import AllStatement, find_all_statements
 from unexport.relate import is_runtime_missing, relate
 from unexport.rule import Rule
 
@@ -34,28 +35,6 @@ class _AllItemAnalyzer(ast.NodeVisitor):
     @Rule.apply
     def visit_Name(self, node: ast.Name) -> None:
         self.variables.add(node.id)
-
-    @Rule.apply
-    def visit_Assign(self, node: ast.Assign) -> None:
-        assert isinstance(node.value, (ast.List, ast.Tuple, ast.Set))
-        for item in node.value.elts:
-            if isinstance(item, ast.Constant):
-                self.actual_all.add(str(item.value))
-
-    @Rule.apply
-    def visit_Expr(self, node: ast.Expr) -> None:
-        assert isinstance(node.value, ast.Call)
-        assert isinstance(node.value.func, ast.Attribute)
-        if node.value.func.attr == "append":
-            for arg in node.value.args:
-                if isinstance(arg, ast.Constant):
-                    self.actual_all.add(str(arg.value))
-        elif node.value.func.attr == "extend":
-            for arg in node.value.args:
-                if isinstance(arg, ast.List):
-                    for item in arg.elts:
-                        if isinstance(item, ast.Constant):
-                            self.actual_all.add(str(item.value))
 
 
 @dataclass
@@ -126,6 +105,7 @@ class Analyzer:
     source: str
     all_item_analyzer: _AllItemAnalyzer = field(init=False, default_factory=_AllItemAnalyzer)
     module_bindings: _ModuleBindings = field(init=False, default_factory=_ModuleBindings)
+    all_statements: list[AllStatement] = field(init=False, default_factory=list)
 
     def traverse(self) -> None:
         tree = ast.parse(self.source)
@@ -133,6 +113,13 @@ class Analyzer:
         self.set_extra_attr(tree)
         self.all_item_analyzer.visit(tree)
         self.module_bindings.collect(tree)
+        self.all_statements = find_all_statements(tree)
+        self.all_item_analyzer.actual_all = {name for statement in self.all_statements for name in statement.names}
+
+    @property
+    def is_dynamic_all(self) -> bool:
+        """__all__ has parts that can't be read statically (e.g. ``+ sub.__all__``), so it can't be checked."""
+        return any(not statement.is_literal for statement in self.all_statements)
 
     def set_extra_attr(self, tree: ast.AST) -> None:
         skip, add = set(), set()
