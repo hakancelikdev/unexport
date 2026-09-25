@@ -56,6 +56,8 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Crash on modules whose `__all__` is a set
 - An `__all__` with comments inside the literal is reported but not rewritten, so the
   comments are not lost; `# unexport:` markers inside string literals are ignored
+- Names bound in only one branch of an `if` that can't be decided statically (e.g.
+  `if sys.platform == "win32":`) are no longer added to `__all__`
 
 ## [0.4.0] - 2022-11-05
 

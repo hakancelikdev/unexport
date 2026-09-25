@@ -8,6 +8,7 @@ __all__ = (
     "get_parents",
     "is_bare_annotation",
     "is_comprehension_target",
+    "is_conditional_only",
     "is_runtime_missing",
     "relate",
 )
@@ -101,3 +102,44 @@ def is_bare_annotation(node: ast.AST) -> bool:
     """Whether node is the target of an annotation without a value (``X: int``), which binds nothing at runtime."""
     parent = getattr(node, "parent", None)
     return isinstance(parent, ast.AnnAssign) and parent.target is node and parent.value is None
+
+
+def _binds(statements: list[ast.stmt], name: str) -> bool:
+    """Whether the statements bind name at this level (not inside functions or classes they define)."""
+    nodes: list[ast.AST] = list(statements)
+    while nodes:
+        node = nodes.pop()
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            if node.name == name:
+                return True
+            continue
+        if isinstance(node, ast.Lambda):
+            continue
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store) and node.id == name:
+            return True
+        if isinstance(node, (ast.Import, ast.ImportFrom)) and any(
+            (alias.asname or alias.name).split(".")[0] == name for alias in node.names
+        ):
+            return True
+        nodes.extend(ast.iter_child_nodes(node))
+    return False
+
+
+def is_conditional_only(node: ast.AST, name: str) -> bool:
+    """Whether name is bound only in one branch of an ``if`` whose outcome isn't known statically.
+
+    E.g. ``if sys.platform == "win32": class WinOnly: ...`` without an
+    ``else`` that binds ``WinOnly``: on other platforms the name doesn't
+    exist, and listing it in ``__all__`` breaks ``from module import *``.
+    """
+    child = node
+    for parent in get_parents(node):
+        if isinstance(parent, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)):
+            return False
+        if isinstance(parent, ast.If) and _truth_on_import(parent.test) is None:
+            if child in parent.body and not _binds(parent.orelse, name):
+                return True
+            if child in parent.orelse and not _binds(parent.body, name):
+                return True
+        child = parent
+    return False
