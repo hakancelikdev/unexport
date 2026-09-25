@@ -46,10 +46,12 @@ PublicT = TypeVar("PublicT")  # unexport: public
 
 Names that are already in `__all__` stay there as long as the module still binds them,
 even if unexport would not add them on its own: re-exported imports, dunders such as
-`__version__`, lowercase variables or private helpers. If the module has a star import,
-listed names that may come from it are kept as well. A listed name that no longer
-exists, or that is marked `# unexport: not-public` (also on an import, or on one name of
-a multi-line import), is removed.
+`__version__`, lowercase variables or private helpers. Listed names that may exist
+without a visible binding are kept as well: when the module has a star import, a module
+`__getattr__` (PEP 562), or updates `globals()`, and, in a package's `__init__.py`, the
+names of its submodules (`from package import *` imports those). A listed name that no
+longer exists, or that is marked `# unexport: not-public` (also on an import, or on one
+name of a multi-line import), is removed.
 
 ```python
 from .core import Api

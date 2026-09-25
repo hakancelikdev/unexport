@@ -71,7 +71,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         for source, py_path, error in session.get_source(path):
             if source is not None:
                 try:
-                    match, expected_all = session.get_expected_all(source)
+                    match, expected_all = session.get_expected_all(source, py_path)
                 except SyntaxError as exc:
                     error = str(exc)
             if error is not None:

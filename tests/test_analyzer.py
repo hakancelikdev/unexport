@@ -1,7 +1,9 @@
 import ast
 import sys
+import tempfile
 import textwrap
 import unittest
+from pathlib import Path
 
 from unexport.analyzer import Analyzer
 
@@ -306,6 +308,29 @@ class AnalyzerListedNamesTestCase(unittest.TestCase):
             __all__ = ["Api", "Group", "Hidden", "User", "os"]
         """
         self.assertListEqual(self.expected_all(source), ["User"])
+
+    def test_names_provided_at_runtime_are_kept(self):
+        for source in (
+            "__all__ = ['Lazy', 'Real']\nclass Real: ...\ndef __getattr__(name): ...\n",
+            "__all__ = ['RED']\nglobals().update({'RED': 1})\n",
+            "import enum\n__all__ = ['Color', 'RED']\n@enum.global_enum\nclass Color(enum.Enum):\n    RED = 1\n",
+            "__all__ = ['Cap', 'rest']\nmatch (1,):\n    case (Cap,):\n        pass\nmatch {}:\n    case {**rest}:\n        pass\n",
+        ):
+            with self.subTest(source=source):
+                analyzer = Analyzer(source=source)
+                analyzer.traverse()
+                self.assertListEqual(analyzer.expected_all, analyzer.actual_all)
+
+    def test_listed_submodules_of_a_package_are_kept(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = Path(directory)
+            (package / "sub.py").write_text("")
+            (package / "subpackage").mkdir()
+            init = package / "__init__.py"
+            source = "__all__ = ['Thing', 'gone', 'sub', 'subpackage']\nclass Thing: ...\n"
+            analyzer = Analyzer(source=source, path=init)
+            analyzer.traverse()
+            self.assertListEqual(analyzer.expected_all, ["Thing", "sub", "subpackage"])
 
     def test_listed_but_undefined_is_removed(self):
         source = """\
