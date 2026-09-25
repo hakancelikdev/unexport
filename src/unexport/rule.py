@@ -8,7 +8,13 @@ from typing import ClassVar, NamedTuple, cast
 
 from unexport import constants as C
 from unexport import typing as T
-from unexport.relate import first_occurrence, is_bare_annotation, is_comprehension_target, is_runtime_missing
+from unexport.relate import (
+    first_occurrence,
+    is_bare_annotation,
+    is_comprehension_target,
+    is_conditional_only,
+    is_runtime_missing,
+)
 
 __all__ = ("Rule",)
 
@@ -177,3 +183,17 @@ def _rule_name_not_bare_annotation(node) -> bool:
     if hasattr(node, "add"):
         return node.add is True
     return not is_bare_annotation(node)
+
+
+@Rule.register(  # type: ignore
+    (  # type: ignore
+        ast.ClassDef,
+        ast.FunctionDef,
+        ast.AsyncFunctionDef,
+        ast.Name,
+    )
+)
+def _rule_not_conditional_only(node) -> bool:
+    if hasattr(node, "add"):
+        return node.add is True
+    return not is_conditional_only(node, node.id if isinstance(node, ast.Name) else node.name)

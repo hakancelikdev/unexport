@@ -42,6 +42,26 @@ T = TypeVar("T")  # not added to __all__
 PublicT = TypeVar("PublicT")  # unexport: public
 ```
 
+## Conditional names
+
+A name defined in only one branch of an `if` whose outcome depends on the platform, the
+Python version or anything else unexport can't know is not added to `__all__`: on the
+other branch it doesn't exist, and `from module import *` would fail there. Names bound
+in every branch are added as usual. Write 'unexport: public' as a comment to add one
+anyway, or list it yourself.
+
+```python
+import sys
+
+if sys.platform == "win32":
+    class WinRegistry: ...  # not added
+
+if sys.version_info >= (3, 11):
+    Feature = ...  # added: bound in both branches
+else:
+    Feature = ...
+```
+
 ## Names you list yourself
 
 Names that are already in `__all__` stay there as long as the module still binds them,

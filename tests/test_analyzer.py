@@ -430,6 +430,39 @@ class AnalyzerRuntimeNamesTestCase(unittest.TestCase):
         """
         self.assertListEqual(self.expected_all(source), ["Real"])
 
+    def test_names_bound_in_one_branch_only(self):
+        source = """\
+            import sys
+
+            if sys.platform == "win32":
+                class WinOnly: ...
+                Both = 1
+            elif sys.platform == "darwin":
+                Both = 2
+            else:
+                def Both(): ...
+
+            if sys.version_info >= (3, 11):
+                Feature = 1
+            else:
+                from compat import Feature
+
+            if sys.platform == "linux":
+                LinuxOnly = 1  # unexport: public
+        """
+        self.assertListEqual(self.expected_all(source), ["Both", "Feature", "LinuxOnly"])
+
+    def test_listed_conditional_name_is_kept(self):
+        source = """\
+            import sys
+
+            __all__ = ["WinOnly"]
+
+            if sys.platform == "win32":
+                class WinOnly: ...
+        """
+        self.assertListEqual(self.expected_all(source), ["WinOnly"])
+
     def test_rebound_after_del(self):
         source = """\
             VALUE = 1
