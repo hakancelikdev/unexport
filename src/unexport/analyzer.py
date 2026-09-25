@@ -107,4 +107,5 @@ class Analyzer:
 
     @property
     def expected_all(self):
-        return sorted(self.classes + self.functions + self.variables)
+        # A name can be both a class/function and a variable (e.g. ``Point = Point``); list it once.
+        return sorted(set(self.classes) | set(self.functions) | set(self.variables))
