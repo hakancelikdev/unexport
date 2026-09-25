@@ -5,7 +5,12 @@ import pytest
 from unexport import utils
 from unexport.main import main
 
-__all__ = ["test_errors_are_reported", "test_read_errors", "test_several_statements_are_not_refactored"]
+__all__ = [
+    "test_errors_are_reported",
+    "test_read_errors",
+    "test_refactor_keeps_crlf_newlines",
+    "test_several_statements_are_not_refactored",
+]
 
 
 def test_errors_are_reported(tmp_path: Path, capsys):
@@ -54,3 +59,12 @@ def test_several_statements_are_not_refactored(tmp_path: Path, capsys):
     assert "Refactoring" not in output
     assert path.read_text() == source
     assert exit_code == 1
+
+
+def test_refactor_keeps_crlf_newlines(tmp_path: Path):
+    path = tmp_path / "crlf.py"
+    path.write_bytes(b"import os\r\n\r\nclass Public: ...\r\n")
+
+    main(["--refactor", path.as_posix()])
+
+    assert path.read_bytes() == b'import os\r\n\r\n__all__ = ["Public"]\r\n\r\nclass Public: ...\r\n'
