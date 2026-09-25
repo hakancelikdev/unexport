@@ -67,13 +67,13 @@ class _ModuleBindings:
                 continue
             if isinstance(node, ast.Import):
                 for alias in node.names:
-                    self._bind((alias.asname or alias.name).split(".")[0], node)
+                    self._bind((alias.asname or alias.name).split(".")[0], alias)
             elif isinstance(node, ast.ImportFrom):
                 for alias in node.names:
                     if alias.name == "*":
                         self.has_star_import = True
                     else:
-                        self._bind(alias.asname or alias.name, node)
+                        self._bind(alias.asname or alias.name, alias)
             elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store) and not is_bare_annotation(node):
                 self._bind(node.id, node)
             nodes.extend(ast.iter_child_nodes(node))
@@ -138,8 +138,11 @@ class Analyzer:
         for node in ast.walk(tree):
             if isinstance(node, C.ALL_NODE) and node.lineno in skip:
                 node.skip = True  # type: ignore
-            else:
+            elif not isinstance(node, ast.alias):  # set with their import statement below
                 node.skip = False  # type: ignore
+            if isinstance(node, (ast.Import, ast.ImportFrom)):
+                for alias in node.names:  # the comment can be on the statement or on the imported name's line
+                    alias.skip = alias.lineno in skip or node.lineno in skip  # type: ignore
 
             if isinstance(node, C.ALL_NODE) and node.lineno in add:
                 node.add = True  # type: ignore
