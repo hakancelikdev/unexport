@@ -32,6 +32,9 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Comments after `__all__` were removed while refactoring
 - A name defined both as a class/function and a variable is listed once in `__all__`
   [#43](https://github.com/hakancelikdev/unexport/issues/43)
+- Names already listed in `__all__` that the module still binds (re-exported imports,
+  dunders, lowercase variables) or that a star import may provide are kept instead of
+  being removed [#39](https://github.com/hakancelikdev/unexport/issues/39)
 - Crash on modules whose `__all__` is a set
 
 ## [0.4.0] - 2022-11-05

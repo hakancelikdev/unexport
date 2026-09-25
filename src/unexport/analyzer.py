@@ -59,15 +59,67 @@ class _AllItemAnalyzer(ast.NodeVisitor):
 
 
 @dataclass
+class _ModuleBindings:
+    """Names bound at module level, of any kind: imports, classes, functions and variables."""
+
+    names: set[str] = field(default_factory=set)
+    not_public: set[str] = field(default_factory=set)  # marked with ``# unexport: not-public``
+    has_star_import: bool = False
+
+    def collect(self, tree: ast.Module) -> None:
+        nodes: list[ast.AST] = list(tree.body)
+        while nodes:
+            node = nodes.pop()
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                self._bind(node.name, node)
+                nodes.extend(node.decorator_list)  # the body is a nested scope
+                continue
+            if isinstance(node, ast.Lambda):
+                continue
+            if isinstance(node, ast.comprehension):
+                nodes.extend([node.iter, *node.ifs])  # the target is local to the comprehension
+                continue
+            if isinstance(node, ast.Import):
+                self.names.update((alias.asname or alias.name).split(".")[0] for alias in node.names)
+            elif isinstance(node, ast.ImportFrom):
+                for alias in node.names:
+                    if alias.name == "*":
+                        self.has_star_import = True
+                    else:
+                        self.names.add(alias.asname or alias.name)
+            elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+                self._bind(node.id, node)
+            nodes.extend(ast.iter_child_nodes(node))
+
+    def _bind(self, name: str, node: ast.AST) -> None:
+        self.names.add(name)
+        if getattr(node, "skip", False):
+            self.not_public.add(name)
+
+    def keeps(self, name: str) -> bool:
+        """Whether a name that is already listed in __all__ stays there.
+
+        It does when the module binds it (a re-exported import, a dunder
+        or a lowercase variable that unexport would not add on its own),
+        or when a star import might provide it.
+        """
+        if name in self.not_public:
+            return False
+        return name in self.names or self.has_star_import
+
+
+@dataclass
 class Analyzer:
     source: str
     all_item_analyzer: _AllItemAnalyzer = field(init=False, default_factory=_AllItemAnalyzer)
+    module_bindings: _ModuleBindings = field(init=False, default_factory=_ModuleBindings)
 
     def traverse(self) -> None:
         tree = ast.parse(self.source)
         relate(tree)
         self.set_extra_attr(tree)
         self.all_item_analyzer.visit(tree)
+        self.module_bindings.collect(tree)
 
     def set_extra_attr(self, tree: ast.AST) -> None:
         skip, add = set(), set()
@@ -108,4 +160,7 @@ class Analyzer:
     @property
     def expected_all(self):
         # A name can be both a class/function and a variable (e.g. ``Point = Point``); list it once.
-        return sorted(set(self.classes) | set(self.functions) | set(self.variables))
+        public = set(self.classes) | set(self.functions) | set(self.variables)
+        # Names that are already listed and still exist are deliberate (re-exports, dunders, ...), keep them.
+        listed = {name for name in self.all_item_analyzer.actual_all if self.module_bindings.keeps(name)}
+        return sorted(public | listed)
