@@ -9,6 +9,7 @@ __all__ = [
     "AnalyzerClassesTestCase",
     "AnalyzerFunctionTestCase",
     "AnalyzerListedNamesTestCase",
+    "AnalyzerRuntimeNamesTestCase",
     "AnalyzerPEP695TestCase",
     "AnalyzerPEP696TestCase",
     "AnalyzerPython314TestCase",
@@ -271,6 +272,91 @@ class AnalyzerListedNamesTestCase(unittest.TestCase):
             VALUES = [item for item in range(3)]
         """
         self.assertListEqual(self.expected_all(source), ["VALUES", "func"])
+
+
+class AnalyzerRuntimeNamesTestCase(unittest.TestCase):
+    """Names that don't exist when the module is imported are not exported (issue 40)."""
+
+    def expected_all(self, source: str) -> list[str]:
+        analyzer = Analyzer(source=textwrap.dedent(source))
+        analyzer.traverse()
+        return analyzer.expected_all
+
+    def test_deleted_name(self):
+        source = """\
+            TEMP = 1
+            del TEMP
+            KEPT = 1
+        """
+        self.assertListEqual(self.expected_all(source), ["KEPT"])
+
+    def test_rebound_after_del(self):
+        source = """\
+            VALUE = 1
+            del VALUE
+            VALUE = 2
+        """
+        self.assertListEqual(self.expected_all(source), ["VALUE"])
+
+    def test_type_checking_block(self):
+        source = """\
+            import typing
+            from typing import TYPE_CHECKING
+
+            if TYPE_CHECKING:
+                Alias = int
+                class Stub: ...
+            else:
+                Runtime = int
+
+            if typing.TYPE_CHECKING:
+                Other = int
+        """
+        self.assertListEqual(self.expected_all(source), ["Runtime"])
+
+    def test_main_guard(self):
+        source = """\
+            def main(): ...
+
+            if __name__ == "__main__":
+                RESULT = main()
+
+            if "__main__" == __name__:
+                OTHER = main()
+        """
+        self.assertListEqual(self.expected_all(source), ["main"])
+
+    def test_comprehension_targets(self):
+        source = """\
+            VALUES = [Item for Item in range(3)]
+            PAIRS = {Key: Value for Key, Value in []}
+            FIRST = [(Last := x) for x in range(3)]
+        """
+        # a walrus inside a comprehension binds at module level
+        self.assertListEqual(self.expected_all(source), ["FIRST", "Last", "PAIRS", "VALUES"])
+
+    def test_public_comment_still_forces(self):
+        source = """\
+            if TYPE_CHECKING:
+                Alias = int  # unexport: public
+        """
+        self.assertListEqual(self.expected_all(source), ["Alias"])
+
+    def test_listed_names_that_do_not_exist_are_removed(self):
+        source = """\
+            from typing import TYPE_CHECKING
+
+            if TYPE_CHECKING:
+                from x import Y
+
+            import os
+            del os
+
+            __all__ = ["Y", "os", "func"]
+
+            def func(): ...
+        """
+        self.assertListEqual(self.expected_all(source), ["func"])
 
 
 @unittest.skipIf(sys.version_info < (3, 12), "PEP 695 syntax requires Python 3.12+")

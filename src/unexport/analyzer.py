@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 
 from unexport import constants as C
 from unexport import typing as T
-from unexport.relate import relate
+from unexport.relate import is_runtime_missing, relate
 from unexport.rule import Rule
 
 __all__ = ("Analyzer",)
@@ -64,12 +64,19 @@ class _ModuleBindings:
 
     names: set[str] = field(default_factory=set)
     not_public: set[str] = field(default_factory=set)  # marked with ``# unexport: not-public``
+    deleted: set[str] = field(default_factory=set)  # removed with ``del`` after their last binding
     has_star_import: bool = False
+    _last_bound: dict[str, int] = field(default_factory=dict, repr=False)
+    _last_deleted: dict[str, int] = field(default_factory=dict, repr=False)
 
     def collect(self, tree: ast.Module) -> None:
         nodes: list[ast.AST] = list(tree.body)
         while nodes:
             node = nodes.pop()
+            if is_runtime_missing(node):  # if TYPE_CHECKING: / if __name__ == "__main__":
+                continue
+            if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Del):
+                self._last_deleted[node.id] = max(node.lineno, self._last_deleted.get(node.id, 0))
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                 self._bind(node.name, node)
                 nodes.extend(node.decorator_list)  # the body is a nested scope
@@ -80,19 +87,25 @@ class _ModuleBindings:
                 nodes.extend([node.iter, *node.ifs])  # the target is local to the comprehension
                 continue
             if isinstance(node, ast.Import):
-                self.names.update((alias.asname or alias.name).split(".")[0] for alias in node.names)
+                for alias in node.names:
+                    self._bind((alias.asname or alias.name).split(".")[0], node)
             elif isinstance(node, ast.ImportFrom):
                 for alias in node.names:
                     if alias.name == "*":
                         self.has_star_import = True
                     else:
-                        self.names.add(alias.asname or alias.name)
+                        self._bind(alias.asname or alias.name, node)
             elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
                 self._bind(node.id, node)
             nodes.extend(ast.iter_child_nodes(node))
 
+        # `del NAME` after the last binding: the name doesn't exist once the module is imported.
+        self.deleted = {name for name, line in self._last_deleted.items() if line > self._last_bound.get(name, 0)}
+        self.names -= self.deleted
+
     def _bind(self, name: str, node: ast.AST) -> None:
         self.names.add(name)
+        self._last_bound[name] = max(getattr(node, "lineno", 0), self._last_bound.get(name, 0))
         if getattr(node, "skip", False):
             self.not_public.add(name)
 
@@ -160,7 +173,7 @@ class Analyzer:
     @property
     def expected_all(self):
         # A name can be both a class/function and a variable (e.g. ``Point = Point``); list it once.
-        public = set(self.classes) | set(self.functions) | set(self.variables)
+        public = (set(self.classes) | set(self.functions) | set(self.variables)) - self.module_bindings.deleted
         # Names that are already listed and still exist are deliberate (re-exports, dunders, ...), keep them.
         listed = {name for name in self.all_item_analyzer.actual_all if self.module_bindings.keeps(name)}
         return sorted(public | listed)

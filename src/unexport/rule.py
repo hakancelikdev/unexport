@@ -8,7 +8,7 @@ from typing import ClassVar, NamedTuple, cast
 
 from unexport import constants as C
 from unexport import typing as T
-from unexport.relate import first_occurrence
+from unexport.relate import first_occurrence, is_comprehension_target, is_runtime_missing
 
 __all__ = ("Rule",)
 
@@ -131,6 +131,27 @@ def _rule_name_not_type_var(node) -> bool:
     if isinstance(func, ast.Attribute):
         return func.attr not in C.TYPE_VAR_FACTORIES
     return True
+
+
+@Rule.register(  # type: ignore
+    (  # type: ignore
+        ast.ClassDef,
+        ast.FunctionDef,
+        ast.AsyncFunctionDef,
+        ast.Name,
+    )
+)
+def _rule_exists_at_runtime(node) -> bool:
+    if hasattr(node, "add"):
+        return node.add is True
+    return not is_runtime_missing(node)
+
+
+@Rule.register((ast.Name,))  # type: ignore
+def _rule_name_not_comprehension_target(node) -> bool:
+    if hasattr(node, "add"):
+        return node.add is True
+    return not is_comprehension_target(node)
 
 
 @Rule.register((ast.Assign,))  # type: ignore

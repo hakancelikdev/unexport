@@ -44,6 +44,10 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Syntax errors and files that can't be read or decoded are reported with their path and
   make the exit code 1, instead of being skipped silently or crashing the run
   [#44](https://github.com/hakancelikdev/unexport/issues/44)
+- Names that don't exist when the module is imported are no longer added to `__all__`:
+  names deleted with `del`, defined only under `if TYPE_CHECKING:` or
+  `if __name__ == "__main__":`, and comprehension variables
+  [#40](https://github.com/hakancelikdev/unexport/issues/40)
 - Crash on modules whose `__all__` is a set
 
 ## [0.4.0] - 2022-11-05
