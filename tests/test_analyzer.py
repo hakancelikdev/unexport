@@ -336,6 +336,17 @@ class AnalyzerRuntimeNamesTestCase(unittest.TestCase):
         """
         self.assertListEqual(self.expected_all(source), ["KEPT"])
 
+    def test_bare_annotation(self):
+        source = """\
+            __all__ = ["Declared", "Assigned"]
+
+            Declared: int
+            Assigned: int = 1
+            Later: str
+            Later = "set later"
+        """
+        self.assertListEqual(self.expected_all(source), ["Assigned", "Later"])
+
     def test_rebound_after_del(self):
         source = """\
             VALUE = 1

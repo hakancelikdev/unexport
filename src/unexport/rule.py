@@ -8,7 +8,7 @@ from typing import ClassVar, NamedTuple, cast
 
 from unexport import constants as C
 from unexport import typing as T
-from unexport.relate import first_occurrence, is_comprehension_target, is_runtime_missing
+from unexport.relate import first_occurrence, is_bare_annotation, is_comprehension_target, is_runtime_missing
 
 __all__ = ("Rule",)
 
@@ -152,3 +152,10 @@ def _rule_name_not_comprehension_target(node) -> bool:
     if hasattr(node, "add"):
         return node.add is True
     return not is_comprehension_target(node)
+
+
+@Rule.register((ast.Name,))  # type: ignore
+def _rule_name_not_bare_annotation(node) -> bool:
+    if hasattr(node, "add"):
+        return node.add is True
+    return not is_bare_annotation(node)
