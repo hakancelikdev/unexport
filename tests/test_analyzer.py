@@ -362,6 +362,39 @@ class AnalyzerRuntimeNamesTestCase(unittest.TestCase):
         """
         self.assertListEqual(self.expected_all(source), ["Assigned", "Later"])
 
+    def test_deleted_on_the_same_line(self):
+        source = """\
+            TEMP = 1; del TEMP
+            KEPT = 1; del KEPT; KEPT = 2
+        """
+        self.assertListEqual(self.expected_all(source), ["KEPT"])
+
+    def test_constant_false_branches(self):
+        source = """\
+            from typing import TYPE_CHECKING
+
+            if False:
+                class Never: ...
+            if 0:
+                Zero = 1
+            if True:
+                Always = 1
+            else:
+                Otherwise = 1
+            if not TYPE_CHECKING:
+                Runtime = 1
+            else:
+                Checking = 1
+        """
+        self.assertListEqual(self.expected_all(source), ["Always", "Runtime"])
+
+    def test_walrus_in_lambda(self):
+        source = """\
+            handler = lambda: (Value := 1)
+            Real = 1
+        """
+        self.assertListEqual(self.expected_all(source), ["Real"])
+
     def test_rebound_after_del(self):
         source = """\
             VALUE = 1

@@ -96,7 +96,8 @@ def _rule_node_add(node) -> bool:
     )
 )
 def _rule_parent_not_def(node) -> bool:
-    return not first_occurrence(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
+    # A walrus in a lambda binds a local of the lambda, not a module name.
+    return not first_occurrence(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda))
 
 
 @Rule.register(  # type: ignore
