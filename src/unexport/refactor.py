@@ -46,21 +46,23 @@ def _replace_value(lines: list[str], node: ast.expr, expected_all: list[str]) ->
     suffix = lines[end].encode()[node.end_col_offset :].decode()
     brackets = _BRACKETS.get(type(node), ("[", "]"))
     text = _format_all(expected_all, brackets)
-    if start != end or len(prefix + text + suffix.rstrip("\r\n")) > _MAX_LINE_LENGTH:
+    if expected_all and (start != end or len(prefix + text + suffix.rstrip("\r\n")) > _MAX_LINE_LENGTH):
         indent = prefix[: len(prefix) - len(prefix.lstrip())]
         text = _format_all(expected_all, brackets, multiline=True, indent=indent)
     lines[start : end + 1] = [prefix + text + suffix]
 
 
 def refactor_source(source: str, expected_all: list[str]) -> str:
-    if not expected_all:
-        return source
     tree = ast.parse(source)
     lines = ast._splitlines_no_ff(source)  # type: ignore
 
     if all_node := _find_all_node(tree):
+        # Also when nothing is public anymore: a stale __all__ becomes empty.
         _replace_value(lines, all_node.value, expected_all)
         return "".join(lines)
+
+    if not expected_all:
+        return source
 
     start = _find_insert_line(tree)
     refactored_all = f"__all__ = {_format_all(expected_all)}"

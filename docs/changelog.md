@@ -35,6 +35,9 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Names already listed in `__all__` that the module still binds (re-exported imports,
   dunders, lowercase variables) or that a star import may provide are kept instead of
   being removed [#39](https://github.com/hakancelikdev/unexport/issues/39)
+- A stale `__all__` is rewritten to be empty when nothing is public anymore, and
+  "Refactoring" is only printed when the file changed
+  [#45](https://github.com/hakancelikdev/unexport/issues/45)
 - Crash on modules whose `__all__` is a set
 
 ## [0.4.0] - 2022-11-05
