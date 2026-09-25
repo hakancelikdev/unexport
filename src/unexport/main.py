@@ -81,10 +81,18 @@ def main(argv: Sequence[str] | None = None) -> int:
             if match:
                 continue
             exit_code = 1
-            if args.refactor and session.refactor(path=py_path, apply=True) != source:
+            if args.refactor or args.diff:
+                new_source = session.refactor(path=py_path, apply=args.refactor)
+                if new_source == source:
+                    print(
+                        color.paint(py_path.as_posix(), color.YELLOW)
+                        + ": __all__ is built from several statements and can't be updated automatically; expected "
+                        + color.paint("__all__ = " + str(expected_all), color.GREEN)
+                    )
+                    continue
+            if args.refactor:
                 print(f"Refactoring '{color.paint(str(py_path), color.GREEN)}'")
             if args.diff:
-                new_source = session.refactor(path=py_path, apply=False)
                 diff = utils.diff(
                     action=source.splitlines(),
                     expected=new_source.splitlines(),

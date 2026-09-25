@@ -152,18 +152,3 @@ def _rule_name_not_comprehension_target(node) -> bool:
     if hasattr(node, "add"):
         return node.add is True
     return not is_comprehension_target(node)
-
-
-@Rule.register((ast.Assign,))  # type: ignore
-def _rule_node_is_all(node) -> bool:
-    return getattr(node.targets[0], "id", None) == "__all__" and isinstance(node.value, (ast.List, ast.Tuple, ast.Set))
-
-
-@Rule.register((ast.Expr,))  # type: ignore
-def _rule_node_is_all_item(node) -> bool:
-    return (
-        isinstance(node.value, ast.Call)
-        and isinstance(node.value.func, ast.Attribute)
-        and isinstance(node.value.func.value, ast.Name)
-        and node.value.func.value.id == "__all__"
-    )

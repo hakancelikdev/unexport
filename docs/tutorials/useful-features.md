@@ -59,3 +59,12 @@ __version__ = "1.0"
 
 def helper(): ...
 ```
+
+## How `__all__` is read
+
+`__all__ = [...]`, `__all__: list[str] = [...]`, `__all__ += [...]`,
+`__all__.append("x")` and `__all__.extend([...])` (or a tuple) at module level are all
+understood. When `__all__` is built from several of these statements, unexport reports
+the difference but does not rewrite the file, since changing one statement would list
+names twice; update it by hand. When `__all__` has parts that can't be read statically,
+such as `["a"] + sub.__all__`, the module is not checked.

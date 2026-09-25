@@ -5,7 +5,7 @@ import pytest
 from unexport import utils
 from unexport.main import main
 
-__all__ = ["test_errors_are_reported", "test_read_errors"]
+__all__ = ["test_errors_are_reported", "test_read_errors", "test_several_statements_are_not_refactored"]
 
 
 def test_errors_are_reported(tmp_path: Path, capsys):
@@ -38,3 +38,17 @@ def test_read_errors(tmp_path: Path, content: bytes, error: type):
     with pytest.raises(error):
         utils.read(path)
     assert issubclass(error, utils.READ_ERRORS)
+
+
+def test_several_statements_are_not_refactored(tmp_path: Path, capsys):
+    path = tmp_path / "module.py"
+    source = '__all__ = ["a"]\n__all__ += ["b"]\n\n\ndef a(): ...\n\n\ndef b(): ...\n\n\ndef c(): ...\n'
+    path.write_text(source)
+
+    exit_code = main(["--refactor", path.as_posix()])
+    output = capsys.readouterr().out
+
+    assert "can't be updated automatically" in output and "'c'" in output
+    assert "Refactoring" not in output
+    assert path.read_text() == source
+    assert exit_code == 1

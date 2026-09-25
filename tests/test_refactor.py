@@ -423,6 +423,58 @@ cases = [
             def func(): ...
         """,
     ),
+    (  # issue 41: an annotated __all__ is updated in place
+        """\
+            __all__: list[str] = ["func"]
+
+            def func(): ...
+
+            def other(): ...
+        """,
+        """\
+            __all__: list[str] = ["func", "other"]
+
+            def func(): ...
+
+            def other(): ...
+        """,
+    ),
+    (  # issue 41: __all__ built from several statements is not rewritten
+        """\
+            __all__ = ["a"]
+            __all__ += ["b"]
+
+            def a(): ...
+            def b(): ...
+            def c(): ...
+        """,
+        """\
+            __all__ = ["a"]
+            __all__ += ["b"]
+
+            def a(): ...
+            def b(): ...
+            def c(): ...
+        """,
+    ),
+    (  # issue 41: a dynamic __all__ is left alone
+        """\
+            from . import sub
+
+            __all__ = ["func"] + sub.__all__
+
+            def func(): ...
+            def other(): ...
+        """,
+        """\
+            from . import sub
+
+            __all__ = ["func"] + sub.__all__
+
+            def func(): ...
+            def other(): ...
+        """,
+    ),
 ]
 
 

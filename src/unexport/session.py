@@ -30,7 +30,8 @@ class Session:
     def get_expected_all(source: str) -> tuple[bool, list[str]]:
         analyzer = Analyzer(source=source)
         analyzer.traverse()
-        match = analyzer.actual_all == analyzer.expected_all
+        # A dynamic __all__ (e.g. ``["a"] + sub.__all__``) can't be compared statically; leave it alone.
+        match = analyzer.is_dynamic_all or analyzer.actual_all == analyzer.expected_all
         return match, analyzer.expected_all
 
     @classmethod
