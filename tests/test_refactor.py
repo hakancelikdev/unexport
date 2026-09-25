@@ -357,6 +357,72 @@ cases = [
             _private = 1
         """,
     ),
+    (  # issue 42: after the module docstring
+        """\
+            \"\"\"Module docstring.\"\"\"
+
+
+            def func(): ...
+        """,
+        """\
+            \"\"\"Module docstring.\"\"\"
+
+            __all__ = ["func"]
+
+
+            def func(): ...
+        """,
+    ),
+    (  # issue 42: after a multi-line docstring
+        """\
+            \"\"\"Module docstring.
+
+            More text.
+            \"\"\"
+            def func(): ...
+        """,
+        """\
+            \"\"\"Module docstring.
+
+            More text.
+            \"\"\"
+
+            __all__ = ["func"]
+
+            def func(): ...
+        """,
+    ),
+    (  # issue 42: docstring and __future__ import, after the import
+        """\
+            \"\"\"Doc.\"\"\"
+            from __future__ import annotations
+
+            def func(): ...
+        """,
+        """\
+            \"\"\"Doc.\"\"\"
+            from __future__ import annotations
+
+            __all__ = ["func"]
+
+            def func(): ...
+        """,
+    ),
+    (  # issue 42: shebang and encoding lines stay first
+        """\
+            #!/usr/bin/env python
+            # -*- coding: utf-8 -*-
+            def func(): ...
+        """,
+        """\
+            #!/usr/bin/env python
+            # -*- coding: utf-8 -*-
+
+            __all__ = ["func"]
+
+            def func(): ...
+        """,
+    ),
 ]
 
 

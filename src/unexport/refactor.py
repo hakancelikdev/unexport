@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import ast
+import re
 
 __all__ = ("refactor_source",)
 
 _MAX_LINE_LENGTH = 88
+_CODING_COMMENT = re.compile(r"^[ \t\f]*#.*?coding[:=][ \t]*[-\w.]+")  # PEP 263
 _INDENT = " " * 4
 _BRACKETS = {ast.List: ("[", "]"), ast.Tuple: ("(", ")"), ast.Set: ("{", "}")}
 
@@ -16,9 +18,22 @@ def _find_all_node(tree: ast.Module) -> ast.Assign | None:
     return None
 
 
-def _find_insert_line(tree: ast.Module) -> int:
+def _find_insert_line(tree: ast.Module, lines: list[str]) -> int:
+    """Line index where a new __all__ goes.
+
+    After the last top-level import; without imports, after the module
+    docstring; otherwise after a leading shebang / encoding line, which
+    must stay first.
+    """
     start = 0
-    for node in tree.body:
+    for index, line in enumerate(lines[:2]):
+        if (index == 0 and line.startswith("#!")) or _CODING_COMMENT.match(line):
+            start = index + 1
+    body = tree.body
+    if body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant):
+        if isinstance(body[0].value.value, str):  # module docstring
+            start = body[0].end_lineno or start
+    for node in body:
         if isinstance(node, (ast.Import, ast.ImportFrom)) and node.lineno > start:
             start = node.end_lineno or 0
     return start
@@ -64,7 +79,7 @@ def refactor_source(source: str, expected_all: list[str]) -> str:
     if not expected_all:
         return source
 
-    start = _find_insert_line(tree)
+    start = _find_insert_line(tree, lines)
     refactored_all = f"__all__ = {_format_all(expected_all)}"
     if len(refactored_all) > _MAX_LINE_LENGTH:
         refactored_all = f"__all__ = {_format_all(expected_all, multiline=True)}"
