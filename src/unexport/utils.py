@@ -15,11 +15,14 @@ __all__ = ("READ_ERRORS", "diff", "list_paths", "read")
 READ_ERRORS = (OSError, SyntaxError, UnicodeDecodeError)
 
 
-def read(path: Path) -> tuple[str, str]:
+def read(path: Path) -> tuple[str, str, str]:
+    """Return (source with ``\\n`` newlines, encoding, the file's newline) so the file can be written back as it was."""
     with tokenize.open(path) as stream:
         source = stream.read()
         encoding = stream.encoding
-    return source, encoding
+        newlines = stream.newlines  # the newline(s) seen while reading: None, a str or a tuple of them
+    newline = newlines if isinstance(newlines, str) else (newlines or ("\n",))[0]
+    return source, encoding, newline
 
 
 def list_paths(

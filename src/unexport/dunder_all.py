@@ -19,7 +19,7 @@ class AllStatement(NamedTuple):
     is_literal: bool  # False when part of it can't be read statically (e.g. ``+ sub.__all__``)
 
 
-def _is_all(node: ast.expr) -> bool:
+def _is_all(node: ast.AST) -> bool:
     return isinstance(node, ast.Name) and node.id == "__all__"
 
 
@@ -35,9 +35,22 @@ def _literal_names(value: ast.expr | None) -> tuple[list[str], bool]:
     return [], False
 
 
+def _binds_all(target: ast.expr) -> bool:
+    """``__all__`` inside an unpacking target, e.g. ``__all__, X = [...], 1``."""
+    return any(_is_all(node) for node in ast.walk(target))
+
+
 def _read(node: ast.stmt) -> AllStatement | None:
     if isinstance(node, ast.Assign) and any(_is_all(target) for target in node.targets):
         return AllStatement(node, *_literal_names(node.value))
+    if isinstance(node, (ast.Import, ast.ImportFrom)) and any(
+        (alias.asname or alias.name) == "__all__" for alias in node.names
+    ):
+        return AllStatement(node, [], False)  # ``from io import __all__``: its names can't be read here
+    if isinstance(node, (ast.Assign, ast.For, ast.AsyncFor)) and any(
+        _binds_all(target) for target in (node.targets if isinstance(node, ast.Assign) else [node.target])
+    ):
+        return AllStatement(node, [], False)
     if isinstance(node, ast.AnnAssign) and _is_all(node.target) and node.value is not None:
         return AllStatement(node, *_literal_names(node.value))
     if isinstance(node, ast.AugAssign) and _is_all(node.target):

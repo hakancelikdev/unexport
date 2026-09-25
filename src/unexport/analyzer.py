@@ -56,6 +56,10 @@ def _submodules(package_init: Path) -> set[str]:
     }
 
 
+def _position(node: ast.AST) -> tuple[int, int]:
+    return getattr(node, "lineno", 0), getattr(node, "col_offset", 0)
+
+
 @dataclass
 class _ModuleBindings:
     """Names bound at module level, of any kind: imports, classes, functions and variables."""
@@ -68,8 +72,9 @@ class _ModuleBindings:
     # updates or ``@enum.global_enum``.
     has_dynamic_namespace: bool = False
     submodules: set[str] = field(default_factory=set)  # of a package's __init__.py; ``from pkg import *`` imports them
-    _last_bound: dict[str, int] = field(default_factory=dict, repr=False)
-    _last_deleted: dict[str, int] = field(default_factory=dict, repr=False)
+    # (line, column) of the last binding / ``del`` of each name, so ``X = 1; del X`` on one line is ordered too.
+    _last_bound: dict[str, tuple[int, int]] = field(default_factory=dict, repr=False)
+    _last_deleted: dict[str, tuple[int, int]] = field(default_factory=dict, repr=False)
 
     def collect(self, tree: ast.Module) -> None:
         # Anywhere in the module, since functions can change the module namespace too.
@@ -84,7 +89,7 @@ class _ModuleBindings:
             if is_runtime_missing(node):  # if TYPE_CHECKING: / if __name__ == "__main__":
                 continue
             if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Del):
-                self._last_deleted[node.id] = max(node.lineno, self._last_deleted.get(node.id, 0))
+                self._last_deleted[node.id] = max(_position(node), self._last_deleted.get(node.id, (0, 0)))
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                 if node.name == "__getattr__" and not isinstance(node, ast.ClassDef):
                     self.has_dynamic_namespace = True
@@ -114,12 +119,14 @@ class _ModuleBindings:
             nodes.extend(ast.iter_child_nodes(node))
 
         # `del NAME` after the last binding: the name doesn't exist once the module is imported.
-        self.deleted = {name for name, line in self._last_deleted.items() if line > self._last_bound.get(name, 0)}
+        self.deleted = {
+            name for name, position in self._last_deleted.items() if position > self._last_bound.get(name, (0, 0))
+        }
         self.names -= self.deleted
 
     def _bind(self, name: str, node: ast.AST) -> None:
         self.names.add(name)
-        self._last_bound[name] = max(getattr(node, "lineno", 0), self._last_bound.get(name, 0))
+        self._last_bound[name] = max(_position(node), self._last_bound.get(name, (0, 0)))
         if getattr(node, "skip", False):
             self.not_public.add(name)
 
