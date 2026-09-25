@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import ast
+import io
 import re
+import tokenize
 
 from unexport.dunder_all import find_all_statements
 
@@ -64,6 +66,18 @@ def _replace_value(lines: list[str], node: ast.expr, expected_all: list[str]) ->
     lines[start : end + 1] = [prefix + text + suffix]
 
 
+def _has_comments(source: str, lines: list[str], node: ast.expr) -> bool:
+    """Whether there are comments inside the (multi-line) literal."""
+    start, end = node.lineno, node.end_lineno or node.lineno
+    # AST column offsets are UTF-8 byte offsets, tokenize's are character offsets.
+    end_column = len(lines[end - 1].encode()[: node.end_col_offset].decode())
+    for token in tokenize.generate_tokens(io.StringIO(source).readline):
+        if token.type == tokenize.COMMENT and start <= token.start[0] <= end:
+            if token.start[0] < end or token.start[1] < end_column:
+                return True
+    return False
+
+
 def refactor_source(source: str, expected_all: list[str]) -> str:
     tree = ast.parse(source)
     lines = ast._splitlines_no_ff(source)  # type: ignore
@@ -75,6 +89,8 @@ def refactor_source(source: str, expected_all: list[str]) -> str:
             return source
         if not isinstance(node.value, (ast.List, ast.Tuple, ast.Set)):
             return source  # e.g. ["a"] + sub.__all__
+        if _has_comments(source, lines, node.value):
+            return source  # rewriting the literal would drop them
         # Also when nothing is public anymore: a stale __all__ becomes empty.
         _replace_value(lines, node.value, expected_all)
         return "".join(lines)

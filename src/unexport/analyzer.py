@@ -173,13 +173,13 @@ class Analyzer:
     def set_extra_attr(self, tree: ast.AST) -> None:
         skip, add = set(), set()
         readline = io.StringIO(self.source).readline
-        for _, _, start, _, line in tokenize.generate_tokens(readline):
-            if re.search(C.SKIP_COMMENTS_REGEX_PATTERN, line, re.IGNORECASE):
-                lineno = start[0]
-                skip.add(lineno)
-            if re.search(C.ADD_COMMENTS_REGEX_PATTERN, line, re.IGNORECASE):
-                lineno = start[0]
-                add.add(lineno)
+        for token in tokenize.generate_tokens(readline):
+            if token.type != tokenize.COMMENT:  # not the same text inside a string literal
+                continue
+            if re.search(C.SKIP_COMMENTS_REGEX_PATTERN, token.string, re.IGNORECASE):
+                skip.add(token.start[0])
+            if re.search(C.ADD_COMMENTS_REGEX_PATTERN, token.string, re.IGNORECASE):
+                add.add(token.start[0])
 
         for node in ast.walk(tree):
             if isinstance(node, C.ALL_NODE) and node.lineno in skip:

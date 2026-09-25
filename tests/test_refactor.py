@@ -509,6 +509,40 @@ cases = [
             class Extra: ...
         """,
     ),
+    (  # comments inside the literal would be lost, so it is left alone
+        """\
+            __all__ = [
+                "A",  # the main entry point
+                # "Old",
+            ]
+
+            class A: ...
+            class B: ...
+        """,
+        """\
+            __all__ = [
+                "A",  # the main entry point
+                # "Old",
+            ]
+
+            class A: ...
+            class B: ...
+        """,
+    ),
+    (  # a comment after the literal is kept by the rewrite
+        """\
+            __all__ = ["A"]  # public API
+
+            class A: ...
+            class B: ...
+        """,
+        """\
+            __all__ = ["A", "B"]  # public API
+
+            class A: ...
+            class B: ...
+        """,
+    ),
 ]
 
 
