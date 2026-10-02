@@ -5,10 +5,12 @@ import io
 import re
 import tokenize
 from dataclasses import dataclass, field
+from pathlib import Path
 
 from unexport import constants as C
 from unexport import typing as T
-from unexport.relate import relate
+from unexport.dunder_all import AllStatement, find_all_statements
+from unexport.relate import is_bare_annotation, is_runtime_missing, relate
 from unexport.rule import Rule
 
 __all__ = ("Analyzer",)
@@ -35,62 +37,158 @@ class _AllItemAnalyzer(ast.NodeVisitor):
     def visit_Name(self, node: ast.Name) -> None:
         self.variables.add(node.id)
 
-    @Rule.apply
-    def visit_Assign(self, node: ast.Assign) -> None:
-        assert isinstance(node.value, (ast.List, ast.Tuple))
-        for item in node.value.elts:
-            if isinstance(item, ast.Constant):
-                self.actual_all.add(str(item.value))
-            elif isinstance(item, ast.Str):
-                self.actual_all.add(item.s)
 
-    @Rule.apply
-    def visit_Expr(self, node: ast.Expr) -> None:
-        assert isinstance(node.value, ast.Call)
-        assert isinstance(node.value.func, ast.Attribute)
-        if node.value.func.attr == "append":
-            for arg in node.value.args:
-                if isinstance(arg, ast.Constant):
-                    self.actual_all.add(str(arg.value))
-                elif isinstance(arg, ast.Str):
-                    self.actual_all.add(arg.s)
-        elif node.value.func.attr == "extend":
-            for arg in node.value.args:
-                if isinstance(arg, ast.List):
-                    for item in arg.elts:
-                        if isinstance(item, ast.Constant):
-                            self.actual_all.add(str(item.value))
-                        elif isinstance(item, ast.Str):
-                            self.actual_all.add(item.s)
+_NAMESPACE_ACCESS = frozenset({"globals", "vars", "global_enum"})
+_MATCH_CAPTURES: tuple[type[ast.AST], ...] = (getattr(ast, "MatchAs"), getattr(ast, "MatchStar"))
+_MATCH_MAPPING: type[ast.AST] = getattr(ast, "MatchMapping")
+
+
+def _submodules(package_init: Path) -> set[str]:
+    """Modules and subpackages next to a package's ``__init__.py``."""
+    try:
+        entries = list(package_init.parent.iterdir())
+    except OSError:
+        return set()
+    return {
+        entry.stem if entry.suffix == ".py" else entry.name
+        for entry in entries
+        if (entry.suffix == ".py" and entry.name != "__init__.py") or (entry.is_dir() and entry.name.isidentifier())
+    }
+
+
+def _position(node: ast.AST) -> tuple[int, int]:
+    return getattr(node, "lineno", 0), getattr(node, "col_offset", 0)
+
+
+@dataclass
+class _ModuleBindings:
+    """Names bound at module level, of any kind: imports, classes, functions and variables."""
+
+    names: set[str] = field(default_factory=set)
+    not_public: set[str] = field(default_factory=set)  # marked with ``# unexport: not-public``
+    deleted: set[str] = field(default_factory=set)  # removed with ``del`` after their last binding
+    has_star_import: bool = False
+    # Names can also appear without a visible binding: module ``__getattr__`` (PEP 562), ``globals()`` / ``vars()``
+    # updates or ``@enum.global_enum``.
+    has_dynamic_namespace: bool = False
+    submodules: set[str] = field(default_factory=set)  # of a package's __init__.py; ``from pkg import *`` imports them
+    # (line, column) of the last binding / ``del`` of each name, so ``X = 1; del X`` on one line is ordered too.
+    _last_bound: dict[str, tuple[int, int]] = field(default_factory=dict, repr=False)
+    _last_deleted: dict[str, tuple[int, int]] = field(default_factory=dict, repr=False)
+
+    def collect(self, tree: ast.Module) -> None:
+        # Anywhere in the module, since functions can change the module namespace too.
+        self.has_dynamic_namespace = any(
+            (isinstance(node, ast.Name) and node.id in _NAMESPACE_ACCESS)
+            or (isinstance(node, ast.Attribute) and node.attr == "global_enum")
+            for node in ast.walk(tree)
+        )
+        nodes: list[ast.AST] = list(tree.body)
+        while nodes:
+            node = nodes.pop()
+            if is_runtime_missing(node):  # if TYPE_CHECKING: / if __name__ == "__main__":
+                continue
+            if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Del):
+                self._last_deleted[node.id] = max(_position(node), self._last_deleted.get(node.id, (0, 0)))
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                if node.name == "__getattr__" and not isinstance(node, ast.ClassDef):
+                    self.has_dynamic_namespace = True
+                self._bind(node.name, node)
+                nodes.extend(node.decorator_list)  # the body is a nested scope
+                continue
+            if isinstance(node, ast.Lambda):
+                continue
+            if isinstance(node, ast.comprehension):
+                nodes.extend([node.iter, *node.ifs])  # the target is local to the comprehension
+                continue
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    self._bind((alias.asname or alias.name).split(".")[0], alias)
+            elif isinstance(node, ast.ImportFrom):
+                for alias in node.names:
+                    if alias.name == "*":
+                        self.has_star_import = True
+                    else:
+                        self._bind(alias.asname or alias.name, alias)
+            elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store) and not is_bare_annotation(node):
+                self._bind(node.id, node)
+            elif isinstance(node, _MATCH_CAPTURES) and node.name:  # type: ignore[attr-defined]
+                self._bind(node.name, node)  # type: ignore[attr-defined]
+            elif isinstance(node, _MATCH_MAPPING) and node.rest:  # type: ignore[attr-defined]
+                self._bind(node.rest, node)  # type: ignore[attr-defined]
+            nodes.extend(ast.iter_child_nodes(node))
+
+        # `del NAME` after the last binding: the name doesn't exist once the module is imported.
+        self.deleted = {
+            name for name, position in self._last_deleted.items() if position > self._last_bound.get(name, (0, 0))
+        }
+        self.names -= self.deleted
+
+    def _bind(self, name: str, node: ast.AST) -> None:
+        self.names.add(name)
+        self._last_bound[name] = max(_position(node), self._last_bound.get(name, (0, 0)))
+        if getattr(node, "skip", False):
+            self.not_public.add(name)
+
+    def keeps(self, name: str) -> bool:
+        """Whether a name that is already listed in __all__ stays there.
+
+        It does when the module binds it (a re-exported import, a dunder
+        or a lowercase variable that unexport would not add on its own),
+        when it is a submodule of the package, or when a star import,
+        ``__getattr__`` or a ``globals()`` update might provide it.
+        """
+        if name in self.not_public:
+            return False
+        return name in self.names or name in self.submodules or self.has_star_import or self.has_dynamic_namespace
 
 
 @dataclass
 class Analyzer:
     source: str
+    path: Path | None = None
     all_item_analyzer: _AllItemAnalyzer = field(init=False, default_factory=_AllItemAnalyzer)
+    module_bindings: _ModuleBindings = field(init=False, default_factory=_ModuleBindings)
+    all_statements: list[AllStatement] = field(init=False, default_factory=list)
 
     def traverse(self) -> None:
-        tree = ast.parse(self.source)
+        try:
+            tree = ast.parse(self.source)
+        except ValueError as exc:  # null bytes, before Python 3.12 raised them as SyntaxError
+            raise SyntaxError(str(exc)) from exc
         relate(tree)
         self.set_extra_attr(tree)
         self.all_item_analyzer.visit(tree)
+        if self.path is not None and self.path.name == "__init__.py":
+            self.module_bindings.submodules = _submodules(self.path)
+        self.module_bindings.collect(tree)
+        self.all_statements = find_all_statements(tree)
+        self.all_item_analyzer.actual_all = {name for statement in self.all_statements for name in statement.names}
+
+    @property
+    def is_dynamic_all(self) -> bool:
+        """__all__ has parts that can't be read statically (e.g. ``+ sub.__all__``), so it can't be checked."""
+        return any(not statement.is_literal for statement in self.all_statements)
 
     def set_extra_attr(self, tree: ast.AST) -> None:
         skip, add = set(), set()
         readline = io.StringIO(self.source).readline
-        for _, _, start, _, line in tokenize.generate_tokens(readline):
-            if re.search(C.SKIP_COMMENTS_REGEX_PATTERN, line, re.IGNORECASE):
-                lineno = start[0]
-                skip.add(lineno)
-            if re.search(C.ADD_COMMENTS_REGEX_PATTERN, line, re.IGNORECASE):
-                lineno = start[0]
-                add.add(lineno)
+        for token in tokenize.generate_tokens(readline):
+            if token.type != tokenize.COMMENT:  # not the same text inside a string literal
+                continue
+            if re.search(C.SKIP_COMMENTS_REGEX_PATTERN, token.string, re.IGNORECASE):
+                skip.add(token.start[0])
+            if re.search(C.ADD_COMMENTS_REGEX_PATTERN, token.string, re.IGNORECASE):
+                add.add(token.start[0])
 
         for node in ast.walk(tree):
             if isinstance(node, C.ALL_NODE) and node.lineno in skip:
                 node.skip = True  # type: ignore
-            else:
+            elif not isinstance(node, ast.alias):  # set with their import statement below
                 node.skip = False  # type: ignore
+            if isinstance(node, (ast.Import, ast.ImportFrom)):
+                for alias in node.names:  # the comment can be on the statement or on the imported name's line
+                    alias.skip = alias.lineno in skip or node.lineno in skip  # type: ignore
 
             if isinstance(node, C.ALL_NODE) and node.lineno in add:
                 node.add = True  # type: ignore
@@ -113,4 +211,8 @@ class Analyzer:
 
     @property
     def expected_all(self):
-        return sorted(self.classes + self.functions + self.variables)
+        # A name can be both a class/function and a variable (e.g. ``Point = Point``); list it once.
+        public = (set(self.classes) | set(self.functions) | set(self.variables)) - self.module_bindings.deleted
+        # Names that are already listed and still exist are deliberate (re-exports, dunders, ...), keep them.
+        listed = {name for name in self.all_item_analyzer.actual_all if self.module_bindings.keeps(name)}
+        return sorted(public | listed)

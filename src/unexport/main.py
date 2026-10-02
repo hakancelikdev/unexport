@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 from unexport import __description__, __version__, color
 from unexport import constants as C
@@ -68,21 +68,32 @@ def main(argv: Sequence[str] | None = None) -> int:
     session = Session(config=config)
     exit_code = 0
     for path in args.sources:
-        for source, py_path in session.get_source(path):
-            try:
-                match, expected_all = session.get_expected_all(source)
-                if match:
-                    continue
-            except SyntaxError as e:
-                color.paint(str(e) + "at " + py_path.as_posix(), color.RED)
-                continue
-            else:
+        for source, py_path, error in session.get_source(path):
+            if source is not None:
+                try:
+                    match, expected_all = session.get_expected_all(source, py_path)
+                except SyntaxError as exc:
+                    error = str(exc)
+            if error is not None:
+                print(color.paint(f"{error} at {py_path.as_posix()}", color.RED))
                 exit_code = 1
+                continue
+            if match:
+                continue
+            exit_code = 1
+            if args.refactor or args.diff:
+                new_source = session.refactor(path=py_path, apply=args.refactor)
+                if new_source == source:
+                    print(
+                        color.paint(py_path.as_posix(), color.YELLOW)
+                        + ": __all__ can't be updated automatically (it is built from several statements, is not a"
+                        + " plain list, tuple or set, or has comments inside); expected "
+                        + color.paint("__all__ = " + str(expected_all), color.GREEN)
+                    )
+                    continue
             if args.refactor:
-                session.refactor(path=py_path, apply=True)
                 print(f"Refactoring '{color.paint(str(py_path), color.GREEN)}'")
             if args.diff:
-                new_source = session.refactor(path=py_path, apply=False)
                 diff = utils.diff(
                     action=source.splitlines(),
                     expected=new_source.splitlines(),

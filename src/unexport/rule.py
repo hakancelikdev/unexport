@@ -3,10 +3,18 @@ from __future__ import annotations
 import ast
 import dataclasses
 import functools
-from typing import Callable, ClassVar, Iterator, NamedTuple, cast
+from collections.abc import Callable, Iterator
+from typing import ClassVar, NamedTuple, cast
 
+from unexport import constants as C
 from unexport import typing as T
-from unexport.relate import first_occurrence
+from unexport.relate import (
+    first_occurrence,
+    is_bare_annotation,
+    is_comprehension_target,
+    is_conditional_only,
+    is_runtime_missing,
+)
 
 __all__ = ("Rule",)
 
@@ -94,7 +102,8 @@ def _rule_node_add(node) -> bool:
     )
 )
 def _rule_parent_not_def(node) -> bool:
-    return not first_occurrence(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
+    # A walrus in a lambda binds a local of the lambda, not a module name.
+    return not first_occurrence(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda))
 
 
 @Rule.register(  # type: ignore
@@ -116,16 +125,75 @@ def _rule_name_ctx(node) -> bool:
     return isinstance(node.ctx, ast.Store)
 
 
-@Rule.register((ast.Assign,))  # type: ignore
-def _rule_node_is_all(node) -> bool:
-    return getattr(node.targets[0], "id", None) == "__all__" and isinstance(node.value, (ast.List, ast.Tuple, ast.Set))
+def _assigned_value(node: ast.AST) -> ast.AST | None:
+    """The value a target name gets, following tuple unpacking (``T, U = TypeVar("T"), TypeVar("U")``)."""
+    path: list[int] = []
+    while isinstance(node.parent, (ast.Tuple, ast.List)):  # type: ignore[attr-defined]
+        path.append(node.parent.elts.index(node))  # type: ignore[attr-defined, arg-type]
+        node = node.parent  # type: ignore[attr-defined]
+    parent = node.parent  # type: ignore[attr-defined]
+    if not isinstance(parent, (ast.Assign, ast.AnnAssign)):
+        return None
+    value = parent.value
+    for index in reversed(path):
+        if not isinstance(value, (ast.Tuple, ast.List)) or len(value.elts) <= index:
+            return None
+        value = value.elts[index]
+    return value
 
 
-@Rule.register((ast.Expr,))  # type: ignore
-def _rule_node_is_all_item(node) -> bool:
-    return (
-        isinstance(node.value, ast.Call)
-        and isinstance(node.value.func, ast.Attribute)
-        and isinstance(node.value.func.value, ast.Name)
-        and node.value.func.value.id == "__all__"
+@Rule.register((ast.Name,))  # type: ignore
+def _rule_name_not_type_var(node) -> bool:
+    if hasattr(node, "add"):
+        return node.add is True
+    value = _assigned_value(node)
+    if not isinstance(value, ast.Call):
+        return True
+    func = value.func
+    if isinstance(func, ast.Name):
+        return func.id not in C.TYPE_VAR_FACTORIES
+    if isinstance(func, ast.Attribute):
+        return func.attr not in C.TYPE_VAR_FACTORIES
+    return True
+
+
+@Rule.register(  # type: ignore
+    (  # type: ignore
+        ast.ClassDef,
+        ast.FunctionDef,
+        ast.AsyncFunctionDef,
+        ast.Name,
     )
+)
+def _rule_exists_at_runtime(node) -> bool:
+    if hasattr(node, "add"):
+        return node.add is True
+    return not is_runtime_missing(node)
+
+
+@Rule.register((ast.Name,))  # type: ignore
+def _rule_name_not_comprehension_target(node) -> bool:
+    if hasattr(node, "add"):
+        return node.add is True
+    return not is_comprehension_target(node)
+
+
+@Rule.register((ast.Name,))  # type: ignore
+def _rule_name_not_bare_annotation(node) -> bool:
+    if hasattr(node, "add"):
+        return node.add is True
+    return not is_bare_annotation(node)
+
+
+@Rule.register(  # type: ignore
+    (  # type: ignore
+        ast.ClassDef,
+        ast.FunctionDef,
+        ast.AsyncFunctionDef,
+        ast.Name,
+    )
+)
+def _rule_not_conditional_only(node) -> bool:
+    if hasattr(node, "add"):
+        return node.add is True
+    return not is_conditional_only(node, node.id if isinstance(node, ast.Name) else node.name)
