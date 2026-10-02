@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.5.0] - 2026-10-02
 
 ### Added
 
@@ -58,6 +58,20 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   comments are not lost; `# unexport:` markers inside string literals are ignored
 - Names bound in only one branch of an `if` that can't be decided statically (e.g.
   `if sys.platform == "win32":`) are no longer added to `__all__`
+- `TypeVar`s bound by tuple unpacking (`T, U = TypeVar("T"), TypeVar("U")`) are no
+  longer added to `__all__`
+- `# unexport: not-public` works on imports, also on one name of a multi-line import
+- Listed names that exist at runtime without a visible binding are kept: submodules of a
+  package listed in its `__init__.py`, names served by a module `__getattr__`, and names
+  added through `globals()` or `@enum.global_enum`; `match` captures count as bindings
+- An `__all__` bound by an import (`from io import __all__`) or by unpacking is treated
+  as dynamic instead of being overridden by a new one
+- Crash when the new `__all__` was inserted after an import that ends the file
+- An emptied set `__all__` is written as `set()` instead of `{}` (an empty dict)
+- Files with null bytes are reported as errors instead of crashing the run on Python
+  3.10 and 3.11
+- Refactoring keeps the file's newline style (CRLF files were rewritten to LF)
+- The `LICENSE` file is included in the built package
 
 ## [0.4.0] - 2022-11-05
 
