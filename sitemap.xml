@@ -2,22 +2,22 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://unexport.hakancelik.dev/</loc>
-         <lastmod>2022-11-05</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2026-10-02</lastmod>
     </url>
     <url>
          <loc>https://unexport.hakancelik.dev/authors/</loc>
-         <lastmod>2022-11-05</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2026-10-02</lastmod>
     </url>
     <url>
          <loc>https://unexport.hakancelik.dev/changelog/</loc>
-         <lastmod>2022-11-05</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2026-10-02</lastmod>
     </url>
     <url>
          <loc>https://unexport.hakancelik.dev/contributing/</loc>
-         <lastmod>2022-11-05</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2026-10-02</lastmod>
+    </url>
+    <url>
+         <loc>https://unexport.hakancelik.dev/tutorials/useful-features/</loc>
+         <lastmod>2026-10-02</lastmod>
     </url>
 </urlset>
